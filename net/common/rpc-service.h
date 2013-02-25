@@ -100,6 +100,10 @@ ccnet_rpc_get_emailuser_by_id (int id, GError **error);
 GList*
 ccnet_rpc_get_emailusers (int start, int limit, GError **error);
 
+/* Get total counts of email users. */
+gint64
+ccnet_rpc_count_emailusers (GError **error);
+
 int
 ccnet_rpc_update_emailuser (int id, const char* passwd, int is_staff, int is_active,
                             GError **error);

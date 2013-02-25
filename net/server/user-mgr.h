@@ -80,6 +80,9 @@ ccnet_user_manager_get_emailuser_by_id (CcnetUserManager *manager, int id);
 GList*
 ccnet_user_manager_get_emailusers (CcnetUserManager *manager, int start, int limit);
 
+gint64
+ccnet_user_manager_count_emailusers (CcnetUserManager *manager);
+
 int
 ccnet_user_manager_update_emailuser (CcnetUserManager *manager,
                                      int id, const char* encry_passwd,

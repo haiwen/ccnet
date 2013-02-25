@@ -645,6 +645,17 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager, int start, int lim
     return g_list_reverse (ret);
 }
 
+gint64
+ccnet_user_manager_count_emailusers (CcnetUserManager *manager)
+{
+    CcnetDB* db = manager->priv->db;
+    char sql[512];
+
+    snprintf (sql, 512, "SELECT COUNT(*) FROM EmailUser");
+
+    return ccnet_db_get_int64 (db, sql);
+}
+
 int
 ccnet_user_manager_update_emailuser (CcnetUserManager *manager,
                                      int id, const char* passwd,
