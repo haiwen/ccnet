@@ -165,6 +165,10 @@ AM_CONDITIONAL([MACOS], [test "$bmac" = "true"])
 AM_CONDITIONAL([LINUX], [test "$blinux" = "true"])
 
 
+PKG_CHECK_MODULES(EVENT, [libevent])
+AC_SUBST(EVENT_CFLAGS)
+AC_SUBST(EVENT_LIBS)
+
 # check libraries
 if test "$bwin32" != true; then
   AC_CHECK_LIB(uuid, uuid_generate, [echo "found library uuid"],
