@@ -93,7 +93,7 @@ ccnet_SOURCES = ccnet-daemon.c \
 	$(common_srcs)
 
 
-ccnet_LDADD = -levent $(top_builddir)/lib/libccnetd.la \
+ccnet_LDADD = -lpthread -levent $(top_builddir)/lib/libccnetd.la \
            @GLIB2_LIBS@ @GOBJECT_LIBS@ -lssl @LIB_RT@ @LIB_UUID@ -lsqlite3 \
            @LIB_WS32@ @LIB_INTL@ @LIB_IPHLPAPI@ @SEARPC_LIBS@
 
