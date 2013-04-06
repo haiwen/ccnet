@@ -12,8 +12,13 @@ if COMPILE_DEMO
   MAKE_DEMO = demo
 endif
 
+
 SUBDIRS = include lib net $(MAKE_CLI) $(MAKE_TOOLS) \
-	python $(MAKE_DEMO) tests
+	$(MAKE_DEMO) tests
+
+if COMPILE_PYTHON
+  SUBDIRS += python
+endif
 
 EXTRA_DIST = install-sh libccnet.pc.in LICENCE.txt
 
