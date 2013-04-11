@@ -35,29 +35,30 @@ AC_SYS_LARGEFILE
 #AC_CHECK_FUNCS([alarm dup2 ftruncate getcwd gethostbyname gettimeofday memmove memset mkdir rmdir select setlocale socket strcasecmp strchr strdup strrchr strstr strtol uname utime strtok_r sendfile])
 
 # check platform
-AC_MSG_CHECKING(for WIN32)
-if test "$MINGW32" = yes; then
-  bwin32=true
-  AC_MSG_RESULT(compile in mingw32)
-else
-  AC_MSG_RESULT(no)
-fi
-
-AC_MSG_CHECKING(for Mac)
-if test "$TERM_PROGRAM" = "Apple_Terminal"; then
-  bmac=true
-  AC_MSG_RESULT(compile in mac)
-else
-  AC_MSG_RESULT(no)
-fi
-
-AC_MSG_CHECKING(for Linux)
-if test "$bmac" != "true" -a "$bwin32" != "true"; then
-  blinux=true
-  AC_MSG_RESULT(compile in linux)
-else
-  AC_MSG_RESULT(no)
-fi
+AC_MSG_CHECKING(plataform support)
+AC_CANONICAL_HOST
+case $host_os in
+     cygwin*)
+	bwin32=true
+	AC_MSG_RESULT(win32)
+	;;
+     darwin*)
+	bmac=true
+	AC_MSG_RESULT(darwin)
+	;;
+     linux*)
+	blinux=true
+	AC_MSG_RESULT(linux)
+	;;
+     dragonfly*)
+	bdragonfly=true
+	AC_MSG_RESULT(dragonfly)
+	;;
+     * )
+        #Default Case
+        AC_MSG_ERROR([unsupported $host_os])
+        ;;
+esac
 
 # test which sub-component to compile
 
