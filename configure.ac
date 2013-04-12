@@ -167,7 +167,10 @@ AM_CONDITIONAL([LINUX], [test "$blinux" = "true"])
 
 
 # check libraries
-if test "$bwin32" != true; then
+if test "$bwin32"; then
+  AC_CHECK_LIB(event, event_init, [echo "found library event"],
+    AC_MSG_ERROR([*** Unable to find libevent library]), [-lwsock32])
+elif test "$blinux" = true || test "$bmac" = true; then
   AC_CHECK_LIB(uuid, uuid_generate, [echo "found library uuid"],
       dnl - if failed, try uuid_create
       AC_CHECK_LIB(uuid, uuid_create,[echo "found library uuid"] ,
@@ -177,8 +180,7 @@ if test "$bwin32" != true; then
   AC_CHECK_LIB(event, event_init,[echo "found library event"] ,
     AC_MSG_ERROR([*** Unable to find libevent library]), )
 else
-  AC_CHECK_LIB(event, event_init, [echo "found library event"],
-    AC_MSG_ERROR([*** Unable to find libevent library]), [-lwsock32])
+  AC_CHECK_FUNCS([uuidgen uuid_to_string],, AC_MSG_ERROR(required function not found))
 fi
 
 AC_CHECK_LIB(pthread, pthread_create, [echo "found library pthread"], AC_MSG_ERROR([*** Unable to find pthread library]), )
