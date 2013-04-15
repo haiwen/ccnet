@@ -40,7 +40,7 @@ DIE=0
 	DIE=1
 }
 
-if [[ ! "${TERM_PROGRAM}" =~ ^Apple ]]; then
+if test "${TERM_PROGRAM}" != "Apple_Terminal" ; then
 (grep "^AC_PROG_LIBTOOL" $CONFIGURE >/dev/null) && {
   ($LIBTOOL --version) < /dev/null > /dev/null 2>&1 || {
     echo
@@ -62,7 +62,7 @@ aclocalinclude="$aclocalinclude -I m4"
 
 if test x"$MSYSTEM" = x"MINGW32"; then
     aclocalinclude="$aclocalinclude -I /local/share/aclocal"
-elif [[ "${TERM_PROGRAM}" =~ ^Apple ]]; then
+elif test "${TERM_PROGRAM}" = "Apple_Terminal" ; then
     aclocalinclude="$aclocalinclude -I /opt/local/share/aclocal"
 fi
 
