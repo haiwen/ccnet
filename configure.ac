@@ -200,43 +200,35 @@ if test "$bwin32" = "true"; then
 fi
 AC_SUBST(CONSOLE)
 
+LIB_WS32=
+LIB_GDI32=
+LIB_RT=
+LIB_INTL=
+LIB_RESOLV=
+LIB_UUID=
+LIB_IPHLPAPI=
+LIB_SHELL32=
+LIB_PSAPI=
+MSVC_CFLAGS=
+LIB_DIRWATCH=
+
 if test "$bwin32" = true; then
   LIB_WS32=-lws2_32
   LIB_GDI32=-lgdi32
-  LIB_RT=
   LIB_INTL=-lintl
   LIBS=
-  LIB_RESOLV=
   LIB_UUID=-lRpcrt4
   LIB_IPHLPAPI=-liphlpapi
   LIB_SHELL32=-lshell32
   LIB_PSAPI=-lpsapi
   MSVC_CFLAGS=-D__MSVCRT_VERSION__=0x0601
-  LIB_DIRWATCH=
 elif test "$bmac" = true ; then
-  LIB_WS32=
-  LIB_GDI32=
-  LIB_RT=
-  LIB_INTL=
   LIB_RESOLV=-lresolv
   LIB_UUID=-luuid
-  LIB_IPHLPAPI=
-  LIB_SHELL32=
-  LIB_PSAPI=
-  MSVC_CFLAGS=
   LIB_DIRWATCH="-framework CoreServices"
-else
-  LIB_WS32=
-  LIB_GDI32=
-  LIB_RT=
-  LIB_INTL=
+elif test "$blinux" = true; then
   LIB_RESOLV=-lresolv
   LIB_UUID=-luuid
-  LIB_IPHLPAPI=
-  LIB_SHELL32=
-  LIB_PSAPI=
-  MSVC_CFLAGS=
-  LIB_DIRWATCH=
 fi
 
 AC_SUBST(LIB_WS32)
