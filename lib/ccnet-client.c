@@ -18,6 +18,7 @@
     #include <netinet/in.h>
     #include <arpa/inet.h>
 #endif
+#include <event2/util.h>
 
 #include "message.h"
 

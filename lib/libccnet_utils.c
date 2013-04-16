@@ -14,9 +14,16 @@
     #include <arpa/inet.h>
 #endif
 
-#ifndef WIN32
-#include <pwd.h>
+#ifdef __DragonFly__
+#include <uuid.h>
+#endif
+
+#if defined __Linux__ || defined__APPLE__
 #include <uuid/uuid.h>
+#endif
+
+#if !defined(WIN32)
+#include <pwd.h>
 #endif
 
 #include <unistd.h>
@@ -323,7 +330,7 @@ ccnet_util_expand_path (const char *src)
 #endif
 }
 
-#ifndef WIN32
+#if defined __Linux__ || defined __APPLE__
 char* ccnet_util_gen_uuid ()
 {
     char *uuid_str = g_malloc (37);
@@ -335,6 +342,22 @@ char* ccnet_util_gen_uuid ()
     return uuid_str;
 }
 
+#elif __DragonFly__
+char *ccnet_util_gen_uuid()
+{
+    char *uuid_str = g_malloc(37);
+    uuid_t uuid;
+    uint32_t status;
+
+    /*
+     * XXX - We don't check whether the generation
+     * or the conversion fails?
+     */
+    uuidgen(&uuid, 1);
+    uuid_to_string(&uuid, &uuid_str, &status);
+
+    return uuid_str;
+}
 #else
 char* ccnet_util_gen_uuid ()
 {
@@ -348,7 +371,7 @@ char* ccnet_util_gen_uuid ()
     RpcStringFree(&str);
     return uuid_str;
 }
-#endif
+#endif	/* defined __Linux__ || defined __APPLE__ */
 
 char* ccnet_util_strjoin_n (const char *seperator, int argc, char **argv)
 {
