@@ -13,7 +13,7 @@
 
 #include <unistd.h>
 
-#include <event.h>
+#include <event2/event.h>
 /* #include <event2/event.h> */
 #include <glib.h>
 #include <errno.h>

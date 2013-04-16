@@ -9,7 +9,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <evutil.h>
+#include <event2/util.h>
 
 #include "ccnet-session-base.h"
 

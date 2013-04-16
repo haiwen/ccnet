@@ -19,7 +19,7 @@
     #include <netinet/tcp.h>
 #endif
 
-#include <evutil.h>
+#include <event2/util.h>
 
 #ifdef WIN32
     #define ECONNREFUSED WSAECONNREFUSED

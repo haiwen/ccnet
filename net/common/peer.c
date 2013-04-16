@@ -2,7 +2,7 @@
 
 #include "common.h"
 
-#include <event.h>
+#include <event2/event.h>
 #include <stdio.h>
 #include <stdlib.h>
 

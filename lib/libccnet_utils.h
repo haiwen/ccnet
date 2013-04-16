@@ -14,7 +14,7 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <stdlib.h>
-#include <evutil.h>
+#include <event2/util.h>
 
 #ifdef WIN32
     #include <errno.h>

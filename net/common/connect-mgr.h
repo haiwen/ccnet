@@ -3,7 +3,7 @@
 #ifndef CCNET_CONNECTION_MANAGER
 #define CCNET_CONNECTION_MANAGER
 
-#include <event.h>
+#include <event2/event.h>
 
 #include "timer.h"
 

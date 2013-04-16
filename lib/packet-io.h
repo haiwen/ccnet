@@ -4,7 +4,7 @@
 #define CCNET_CLI_IO_H
 
 #include <packet.h>
-#include <evutil.h>
+#include <event2/util.h>
 
 struct buffer;
 
