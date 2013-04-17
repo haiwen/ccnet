@@ -14,9 +14,16 @@
     #include <arpa/inet.h>
 #endif
 
-#ifndef WIN32
-#include <pwd.h>
+#ifdef __DragonFly__
+#include <uuid.h>
+#endif
+
+#if defined __linux__ || defined__APPLE__
 #include <uuid/uuid.h>
+#endif
+
+#if !defined(WIN32)
+#include <pwd.h>
 #endif
 
 #include <unistd.h>
@@ -488,7 +495,7 @@ ccnet_sha1_equal (const void *v1,
     return 1;
 }
 
-#ifndef WIN32
+#if defined __linux__ || defined __APPLE__
 char* gen_uuid ()
 {
     char *uuid_str = g_malloc (37);
@@ -517,7 +524,41 @@ is_uuid_valid (const char *uuid_str)
         return FALSE;
     return TRUE;
 }
+#elif defined __DragonFly__
+char *gen_uuid()
+{
+    char *uuid_str = g_malloc(37);
+    uuid_t uuid;
+    uint32_t status;
 
+    /*
+     * XXX - We don't check whether the generation
+     * or the conversion fails?
+     */
+    uuidgen(&uuid, 1);
+    uuid_to_string(&uuid, &uuid_str, &status);
+
+    return uuid_str;
+}
+
+void
+gen_uuid_inplace (char *buf)
+{
+    buf = gen_uuid();
+}
+
+gboolean
+is_uuid_valid (const char *uuid_str)
+{
+    uuid_t uuid;
+    uint32_t status;
+
+    uuid_from_string(uuid_str, &uuid, &status);
+    if (status != uuid_s_ok)
+        return FALSE;
+
+    return TRUE;
+}
 #else
 char* gen_uuid ()
 {
@@ -551,8 +592,7 @@ is_uuid_valid (const char *uuid_str)
         return FALSE;
     return TRUE;
 }
-
-#endif
+#endif	/* defined __linux__ || defined __APPLE__ */
 
 char** strsplit_by_space (char *string, int *length)
 {

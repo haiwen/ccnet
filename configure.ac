@@ -35,29 +35,30 @@ AC_SYS_LARGEFILE
 #AC_CHECK_FUNCS([alarm dup2 ftruncate getcwd gethostbyname gettimeofday memmove memset mkdir rmdir select setlocale socket strcasecmp strchr strdup strrchr strstr strtol uname utime strtok_r sendfile])
 
 # check platform
-AC_MSG_CHECKING(for WIN32)
-if test "$MINGW32" = yes; then
-  bwin32=true
-  AC_MSG_RESULT(compile in mingw32)
-else
-  AC_MSG_RESULT(no)
-fi
-
-AC_MSG_CHECKING(for Mac)
-if test "$TERM_PROGRAM" = "Apple_Terminal"; then
-  bmac=true
-  AC_MSG_RESULT(compile in mac)
-else
-  AC_MSG_RESULT(no)
-fi
-
-AC_MSG_CHECKING(for Linux)
-if test "$bmac" != "true" -a "$bwin32" != "true"; then
-  blinux=true
-  AC_MSG_RESULT(compile in linux)
-else
-  AC_MSG_RESULT(no)
-fi
+AC_MSG_CHECKING(plataform support)
+AC_CANONICAL_HOST
+case $host_os in
+     cygwin*)
+	bwin32=true
+	AC_MSG_RESULT(win32)
+	;;
+     darwin*)
+	bmac=true
+	AC_MSG_RESULT(darwin)
+	;;
+     linux*)
+	blinux=true
+	AC_MSG_RESULT(linux)
+	;;
+     dragonfly*)
+	bdragonfly=true
+	AC_MSG_RESULT(dragonfly)
+	;;
+     * )
+        #Default Case
+        AC_MSG_ERROR([unsupported $host_os])
+        ;;
+esac
 
 # test which sub-component to compile
 
@@ -166,18 +167,22 @@ AM_CONDITIONAL([LINUX], [test "$blinux" = "true"])
 
 
 # check libraries
-if test "$bwin32" != true; then
-  AC_CHECK_LIB(uuid, uuid_generate, [echo "found library uuid"],
-      dnl - if failed, try uuid_create
-      AC_CHECK_LIB(uuid, uuid_create,[echo "found library uuid"] ,
-          AC_MSG_ERROR([*** Unable to find uuid library]), )
-      , )
-
-  AC_CHECK_LIB(event, event_init,[echo "found library event"] ,
-    AC_MSG_ERROR([*** Unable to find libevent library]), )
-else
+if test "$bwin32"; then
   AC_CHECK_LIB(event, event_init, [echo "found library event"],
     AC_MSG_ERROR([*** Unable to find libevent library]), [-lwsock32])
+else
+  AC_CHECK_LIB(event, event_init,[echo "found library event"] ,
+    AC_MSG_ERROR([*** Unable to find libevent library]), )
+
+  if test "$blinux" = true || test "$bmac" = true; then
+    AC_CHECK_LIB(uuid, uuid_generate, [echo "found library uuid"],
+      dnl - if failed, try uuid_create
+    AC_CHECK_LIB(uuid, uuid_create,[echo "found library uuid"] ,
+      AC_MSG_ERROR([*** Unable to find uuid library]), ), )
+  else
+    AC_CHECK_FUNCS([uuidgen uuid_to_string],,
+      AC_MSG_ERROR(required function not found))
+  fi
 fi
 
 AC_CHECK_LIB(pthread, pthread_create, [echo "found library pthread"], AC_MSG_ERROR([*** Unable to find pthread library]), )
@@ -197,43 +202,35 @@ if test "$bwin32" = "true"; then
 fi
 AC_SUBST(CONSOLE)
 
+LIB_WS32=
+LIB_GDI32=
+LIB_RT=
+LIB_INTL=
+LIB_RESOLV=
+LIB_UUID=
+LIB_IPHLPAPI=
+LIB_SHELL32=
+LIB_PSAPI=
+MSVC_CFLAGS=
+LIB_DIRWATCH=
+
 if test "$bwin32" = true; then
   LIB_WS32=-lws2_32
   LIB_GDI32=-lgdi32
-  LIB_RT=
   LIB_INTL=-lintl
   LIBS=
-  LIB_RESOLV=
   LIB_UUID=-lRpcrt4
   LIB_IPHLPAPI=-liphlpapi
   LIB_SHELL32=-lshell32
   LIB_PSAPI=-lpsapi
   MSVC_CFLAGS=-D__MSVCRT_VERSION__=0x0601
-  LIB_DIRWATCH=
 elif test "$bmac" = true ; then
-  LIB_WS32=
-  LIB_GDI32=
-  LIB_RT=
-  LIB_INTL=
   LIB_RESOLV=-lresolv
   LIB_UUID=-luuid
-  LIB_IPHLPAPI=
-  LIB_SHELL32=
-  LIB_PSAPI=
-  MSVC_CFLAGS=
   LIB_DIRWATCH="-framework CoreServices"
-else
-  LIB_WS32=
-  LIB_GDI32=
-  LIB_RT=
-  LIB_INTL=
+elif test "$blinux" = true; then
   LIB_RESOLV=-lresolv
   LIB_UUID=-luuid
-  LIB_IPHLPAPI=
-  LIB_SHELL32=
-  LIB_PSAPI=
-  MSVC_CFLAGS=
-  LIB_DIRWATCH=
 fi
 
 AC_SUBST(LIB_WS32)

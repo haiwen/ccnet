@@ -30,8 +30,6 @@
 
 #include <fcntl.h>
 
-#include <evutil.h>
-
 #include "net.h"
 
 

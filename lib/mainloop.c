@@ -3,7 +3,9 @@
 #include "include.h"
 #include <ccnet.h>
 
-#include <event.h>
+#include <event2/event.h>
+#include <event2/event_compat.h>
+#include <event2/event_struct.h>
 
 static int
 cmdrsp_cb (const char *code, char *content, int clen, void *data)

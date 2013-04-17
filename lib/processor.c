@@ -3,7 +3,7 @@
 #include "include.h"
 
 #include <pthread.h>
-#include <event.h>
+#include <event2/event.h>
 
 #include "ccnet-client.h"
 #include "processor.h"

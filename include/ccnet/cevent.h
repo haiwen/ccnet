@@ -6,7 +6,9 @@
 #ifndef CEVENT_H
 #define CEVENT_H
 
-#include <event.h>
+#include <event2/event.h>
+#include <event2/event_compat.h>
+#include <event2/event_struct.h>
 #include <glib.h>
 
 #include <pthread.h>
