@@ -18,7 +18,7 @@
 #include <uuid.h>
 #endif
 
-#if defined __Linux__ || defined__APPLE__
+#if defined __linux__ || defined__APPLE__
 #include <uuid/uuid.h>
 #endif
 
@@ -495,7 +495,7 @@ ccnet_sha1_equal (const void *v1,
     return 1;
 }
 
-#if defined __Linux__ || defined __APPLE__
+#if defined __linux__ || defined __APPLE__
 char* gen_uuid ()
 {
     char *uuid_str = g_malloc (37);
@@ -592,7 +592,7 @@ is_uuid_valid (const char *uuid_str)
         return FALSE;
     return TRUE;
 }
-#endif	/* defined __Linux__ || defined __APPLE__ */
+#endif	/* defined __linux__ || defined __APPLE__ */
 
 char** strsplit_by_space (char *string, int *length)
 {

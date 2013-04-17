@@ -18,7 +18,7 @@
 #include <uuid.h>
 #endif
 
-#if defined __Linux__ || defined__APPLE__
+#if defined __linux__ || defined__APPLE__
 #include <uuid/uuid.h>
 #endif
 
@@ -330,7 +330,7 @@ ccnet_util_expand_path (const char *src)
 #endif
 }
 
-#if defined __Linux__ || defined __APPLE__
+#if defined __linux__ || defined __APPLE__
 char* ccnet_util_gen_uuid ()
 {
     char *uuid_str = g_malloc (37);
@@ -371,7 +371,7 @@ char* ccnet_util_gen_uuid ()
     RpcStringFree(&str);
     return uuid_str;
 }
-#endif	/* defined __Linux__ || defined __APPLE__ */
+#endif	/* defined __linux__ || defined __APPLE__ */
 
 char* ccnet_util_strjoin_n (const char *seperator, int argc, char **argv)
 {
