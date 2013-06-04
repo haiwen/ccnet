@@ -149,6 +149,9 @@ static int try_load_ldap_settings (CcnetUserManager *manager)
         return -1;
     }
 
+    manager->search = g_key_file_get_string (config, "LDAP", "SEARCH", NULL);
+    /* Use base if no filter is set */
+
     manager->user_dn = g_key_file_get_string (config, "LDAP", "USER_DN", NULL);
     if (manager->user_dn) {
         manager->password = g_key_file_get_string (config, "LDAP", "PASSWORD", NULL);
@@ -248,7 +251,11 @@ static int ldap_verify_user_password (CcnetUserManager *manager,
         return -1;
 
     filter = g_string_new (NULL);
-    g_string_printf (filter, "(%s=%s)", manager->login_attr, uid);
+    if (!manager->search)
+        g_string_printf (filter, "(%s=%s)", manager->login_attr, uid);
+    else
+        g_string_printf (filter, "(&(%s=%s) (%s))", manager->login_attr, uid, manager->search);
+
     filter_str = g_string_free (filter, FALSE);
 
     attrs[0] = manager->login_attr;
@@ -317,7 +324,11 @@ static GList *ldap_list_users (CcnetUserManager *manager, const char *uid,
         return NULL;
 
     filter = g_string_new (NULL);
-    g_string_printf (filter, "(%s=%s)", manager->login_attr, uid);
+    if (!manager->search)
+        g_string_printf (filter, "(%s=%s)", manager->login_attr, uid);
+    else
+        g_string_printf (filter, "(&(%s=%s) (%s))", manager->login_attr, uid, manager->search);
+
     filter_str = g_string_free (filter, FALSE);
 
     attrs[0] = manager->login_attr;
@@ -396,7 +407,11 @@ static int ldap_count_users (CcnetUserManager *manager, const char *uid)
         return -1;
 
     filter = g_string_new (NULL);
-    g_string_printf (filter, "(%s=%s)", manager->login_attr, uid);
+    if (!manager->search)
+        g_string_printf (filter, "(%s=%s)", manager->login_attr, uid);
+    else
+        g_string_printf (filter, "(&(%s=%s) (%s))", manager->login_attr, uid, manager->search);
+
     filter_str = g_string_free (filter, FALSE);
 
     attrs[0] = manager->login_attr;
