@@ -72,6 +72,7 @@ write_pidfile (const char *pidfile_path)
     if (fputs(buf, pidfile) < 0) {
         ccnet_warning ("Failed to write pidfile %s: %s\n",
                        pidfile_path, strerror(errno));
+        fclose(pidfile);
         return -1;
     }
 
