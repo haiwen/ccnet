@@ -103,7 +103,7 @@ ccnet_server_LDADD = -levent $(top_builddir)/lib/libccnetd.la \
            @GLIB2_LIBS@ @GOBJECT_LIBS@ -lssl @LIB_RT@ @LIB_UUID@ -lsqlite3 \
 	       -lpthread \
            @LIB_WS32@ @LIB_INTL@ @LIB_IPHLPAPI@ @SEARPC_LIBS@ @ZDB_LIBS@ \
-	  	   @LDAP_LIBS@
+	  	   @LDAP_LIBS@ @JANSSON_LIBS@
 
 
 ccnet_server_LDFLAGS = @STATIC_COMPILE@ @CONSOLE@ @SERVER_PKG_RPATH@ -no-undefined
