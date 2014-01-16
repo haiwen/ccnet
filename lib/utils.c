@@ -564,7 +564,7 @@ char** strsplit_by_space (char *string, int *length)
         return NULL;
     }
 
-    array = malloc (sizeof(char *) * size);
+    array = g_malloc0 (sizeof(char *) * size);
 
     remainder = string;
     while (!done) {
@@ -578,7 +578,7 @@ char** strsplit_by_space (char *string, int *length)
         array[num++] = remainder;
         if (!done && num == size) {
             size <<= 1;
-            array = realloc (array, sizeof(char *) * size);
+            array = g_realloc (array, sizeof(char *) * size);
         }
 
         remainder = s + 1;
@@ -599,7 +599,7 @@ char** strsplit_by_char (char *string, int *length, char c)
         return NULL;
     }
 
-    array = malloc (sizeof(char *) * size);
+    array = g_malloc0 (sizeof(char *) * size);
 
     remainder = string;
     while (!done) {
@@ -613,7 +613,7 @@ char** strsplit_by_char (char *string, int *length, char c)
         array[num++] = remainder;
         if (!done && num == size) {
             size <<= 1;
-            array = realloc (array, sizeof(char *) * size);
+            array = g_realloc (array, sizeof(char *) * size);
         }
 
         remainder = s + 1;

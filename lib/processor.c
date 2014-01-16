@@ -77,7 +77,7 @@ int ccnet_processor_startl (CcnetProcessor *processor, ...)
     while (arg) {
         if (argc >= max) {
             max *= 2;
-            argv = realloc (argv, sizeof(char *) * max);
+            argv = g_realloc (argv, sizeof(char *) * max);
         }
         argv[argc++] = arg;
 
