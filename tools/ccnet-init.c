@@ -127,6 +127,7 @@ main(int argc, char **argv)
     char *config_file;
     int c;
     char *name = NULL;
+    struct stat cd;
 
     program_name = argv[0];
 
@@ -184,11 +185,13 @@ main(int argc, char **argv)
     peer_id = id_from_pubkey (peer_pubkey);
     identity_file_peer = g_build_filename (config_dir, PEER_KEYFILE, NULL);
 
-    /* create dir */
-    if (ccnet_mkdir(config_dir, 0700) < 0) {
-        fprintf (stderr, "Make dir %s error: %s\n", 
+    /* create dir, only if it does not already exist */
+    if(stat(config_dir,&cd) != 0) {
+        if (ccnet_mkdir(config_dir, 0700) < 0) {
+            fprintf (stderr, "Make dir %s error: %s\n", 
                  config_dir, strerror(errno));
-        exit(-ERR_PERMISSION);
+            exit(-ERR_PERMISSION);
+        }
     }
 
     /* save key */
@@ -207,12 +210,17 @@ static void
 make_configure_file (const char *config_file)
 {
     FILE *fp;
+    struct stat cf;
 
-    if ((fp = g_fopen(config_file, "wb")) == NULL) {
+    /* create a .new config file when there is still one */
+    if(stat(config_file,&cf) == 0)
+        config_file = strcat(config_file, ".new");
+    fp = g_fopen(config_file, "wb");
+    /* if ((fp = g_fopen(config_file, "wb")) == NULL) {
         fprintf (stderr, "Open config file %s error: %s\n",
                  config_file, strerror(errno));
         exit(-ERR_CONF_FILE);
-    }
+    } */
 
     fprintf (fp, "[General]\n");
     fprintf (fp, "USER_NAME = %s\n", user_name);
