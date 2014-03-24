@@ -70,7 +70,7 @@ create_peerkey ()
 }
 
 
-static const char *short_opts = "hc:n:a:P:";
+static const char *short_opts = "hc:n:H:P:";
 static const struct option long_opts[] = {
     { "help", no_argument, NULL, 'h' },
     { "config-dir", required_argument, NULL, 'c' },
