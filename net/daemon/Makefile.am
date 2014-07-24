@@ -95,7 +95,7 @@ ccnet_SOURCES = ccnet-daemon.c \
 
 ccnet_LDADD = -levent $(top_builddir)/lib/libccnetd.la \
            @GLIB2_LIBS@ @GOBJECT_LIBS@ -lssl @LIB_RT@ @LIB_UUID@ -lsqlite3 \
-           @LIB_WS32@ @LIB_INTL@ @LIB_IPHLPAPI@ @SEARPC_LIBS@
+           @LIB_WS32@ @LIB_INTL@ @LIB_IPHLPAPI@ @SEARPC_LIBS@ @JANSSON_LIBS@
 
 
 ccnet_LDFLAGS = @STATIC_COMPILE@ @CONSOLE@ @SERVER_PKG_RPATH@ -no-undefined
@@ -106,7 +106,7 @@ ccnet_test_SOURCES = ccnet-test.c daemon-session.c $(common_srcs)
 
 ccnet_test_LDADD = -levent $(top_builddir)/lib/libccnetd.la \
 	@GLIB2_LIBS@ @GOBJECT_LIBS@  -lssl @LIB_RT@ @LIB_UUID@ -lsqlite3 \
-	@LIB_WS32@ @LIB_INTL@ @LIB_IPHLPAPI@ @SEARPC_LIBS@
+	@LIB_WS32@ @LIB_INTL@ @LIB_IPHLPAPI@ @SEARPC_LIBS@ @JANSSON_LIBS@
 
 ccnet_test_LDFLAGS = @STATIC_COMPILE@ -no-undefined @CONSOLE@
 
