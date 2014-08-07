@@ -5,6 +5,7 @@ AC_PREREQ(2.61)
 AC_INIT([ccnet], [1.4.2], [freeplant@gmail.com])
 AC_CONFIG_SRCDIR([net/daemon/ccnet-daemon.c])
 AC_CONFIG_HEADER([config.h])
+AC_CANONICAL_TARGET
 
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -35,6 +36,14 @@ AC_SYS_LARGEFILE
 #AC_CHECK_FUNCS([alarm dup2 ftruncate getcwd gethostbyname gettimeofday memmove memset mkdir rmdir select setlocale socket strcasecmp strchr strdup strrchr strstr strtol uname utime strtok_r sendfile])
 
 # check platform
+case $target_os in
+     *linux*) arch=linux;;
+     *netbsd*) arch=netbsd;;
+     *bsd*) arch=bsd;;
+     *darwin*) arch=darwin;;
+     *) arch=unknown;;
+esac
+
 AC_MSG_CHECKING(for WIN32)
 if test "$MINGW32" = yes; then
   bwin32=true
@@ -44,15 +53,23 @@ else
 fi
 
 AC_MSG_CHECKING(for Mac)
-if test "$(uname)" = "Darwin"; then
+if test "$arch" = darwin; then
   bmac=true
   AC_MSG_RESULT(compile in mac)
 else
   AC_MSG_RESULT(no)
 fi
 
+AC_MSG_CHECKING(for Bsd)
+if test "$arch" = bsd; then
+  bbsd=true
+  AC_MSG_RESULT(compile in bsd)
+else
+  AC_MSG_RESULT(no)
+fi
+
 AC_MSG_CHECKING(for Linux)
-if test "$bmac" != "true" -a "$bwin32" != "true"; then
+if test "$bmac" != true -a "$bwin32" != true -a "$bbsd" != true; then
   blinux=true
   AC_MSG_RESULT(compile in linux)
 else
@@ -72,6 +89,12 @@ if test "$bwin32" = true; then
 fi
 
 if test "$bmac" = true; then
+   compile_client=yes
+   compile_cli=no
+   compile_tools=no
+fi
+
+if test "$bbsd" = true; then
    compile_client=yes
    compile_cli=no
    compile_tools=no
@@ -154,17 +177,16 @@ AM_CONDITIONAL([COMPILE_DEMO], [test "${compile_demo}" = "yes"])
 AM_CONDITIONAL([WIN32], [test "$bwin32" = "true"])
 AM_CONDITIONAL([MACOS], [test "$bmac" = "true"])
 AM_CONDITIONAL([LINUX], [test "$blinux" = "true"])
-
+AM_CONDITIONAL([BSD], [test "$bbsd" = "true"])
 
 # check libraries
-if test "$bwin32" != true; then
-  AC_CHECK_LIB(uuid, uuid_generate, [echo "found library uuid"],
-      dnl - if failed, try uuid_create
-      AC_CHECK_LIB(uuid, uuid_create,[echo "found library uuid"] ,
-          AC_MSG_ERROR([*** Unable to find uuid library]), )
-      , )
-
-  AC_CHECK_LIB(event, event_init,[echo "found library event"] ,
+if test "$bbsd" = true; then
+  AC_CHECK_LIB(c, uuid_create, [echo "found uuid in libc"] ,
+      AC_MSG_ERROR([*** Unable to find uuid library]), )
+elif test "$bwin32" != true; then
+  AC_CHECK_LIB(uuid, uuid_generate, [echo "found library uuid"] ,
+      AC_MSG_ERROR([*** Unable to find uuid library]), )
+  AC_CHECK_LIB(event, event_init, [echo "found library event"] ,
     AC_MSG_ERROR([*** Unable to find libevent library]), )
 else
   AC_CHECK_LIB(event, event_init, [echo "found library event"],
@@ -213,6 +235,18 @@ elif test "$bmac" = true ; then
   LIB_PSAPI=
   MSVC_CFLAGS=
   LIB_DIRWATCH="-framework CoreServices"
+elif test "$bbsd" = true ; then
+  LIB_WS32=
+  LIB_GDI32=
+  LIB_RT=
+  LIB_INTL=
+  LIB_RESOLV=
+  LIB_UUID=
+  LIB_IPHLPAPI=
+  LIB_SHELL32=
+  LIB_PSAPI=
+  MSVC_CFLAGS=
+  LIB_DIRWATCH=
 else
   LIB_WS32=
   LIB_GDI32=
@@ -250,7 +284,12 @@ LIBNAUTILUS_EXTENSION_REQUIRED=2.30.1
 SEARPC_REQUIRED=1.0
 CURL_REQUIRED=7.17
 
+if test "$bbsd" = true; then
+SSL_CFLAGS=
+SSL_LIBS=-lssl
+else
 PKG_CHECK_MODULES(SSL, [openssl])
+fi
 AC_SUBST(SSL_CFLAGS)
 AC_SUBST(SSL_LIBS)
 

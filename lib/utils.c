@@ -16,7 +16,12 @@
 
 #ifndef WIN32
 #include <pwd.h>
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#include <netinet/in.h>
+#include <uuid.h>
+#else /* BSDs */
 #include <uuid/uuid.h>
+#endif /* non-BSDs */
 #endif
 
 #include <unistd.h>
@@ -495,8 +500,13 @@ char* gen_uuid ()
     char *uuid_str = g_malloc (37);
     uuid_t uuid;
 
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+    uuid_create (&uuid, NULL);
+    uuid_to_string (&uuid, &uuid_str, NULL);
+#else
     uuid_generate (uuid);
     uuid_unparse_lower (uuid, uuid_str);
+#endif
 
     return uuid_str;
 }
@@ -505,8 +515,13 @@ void gen_uuid_inplace (char *buf)
 {
     uuid_t uuid;
 
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+    uuid_create (&uuid, NULL);
+    uuid_to_string (&uuid, &buf, NULL);
+#else
     uuid_generate (uuid);
     uuid_unparse_lower (uuid, buf);
+#endif
 }
 
 gboolean
@@ -514,7 +529,13 @@ is_uuid_valid (const char *uuid_str)
 {
     uuid_t uuid;
 
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+    uint32_t status;
+    uuid_from_string (uuid_str, &uuid, &status);
+    if (status != uuid_s_ok)
+#else
     if (uuid_parse (uuid_str, uuid) < 0)
+#endif
         return FALSE;
     return TRUE;
 }
@@ -1625,21 +1646,21 @@ char *
 strtok_r(char *s, const char *delim, char **save_ptr)
 {
     char *token;
-    
+
     if(s == NULL)
         s = *save_ptr;
-    
+
     /* Scan leading delimiters.  */
     s += strspn(s, delim);
     if(*s == '\0') {
         *save_ptr = s;
         return NULL;
     }
-    
+
     /* Find the end of the token.  */
     token = s;
     s = strpbrk(token, delim);
-    
+
     if(s == NULL) {
         /* This token finishes the string.  */
         *save_ptr = strchr(token, '\0');
@@ -1648,7 +1669,7 @@ strtok_r(char *s, const char *delim, char **save_ptr)
         *s = '\0';
         *save_ptr = s + 1;
     }
-    
+
     return token;
 }
 #endif

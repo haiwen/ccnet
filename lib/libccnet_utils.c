@@ -16,7 +16,11 @@
 
 #ifndef WIN32
 #include <pwd.h>
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#include <uuid.h>
+#else /* BSDs */
 #include <uuid/uuid.h>
+#endif /* non-BSDs */
 #endif
 
 #include <unistd.h>
@@ -329,8 +333,13 @@ char* ccnet_util_gen_uuid ()
     char *uuid_str = g_malloc (37);
     uuid_t uuid;
 
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+    uuid_create (&uuid, NULL);
+    uuid_to_string (&uuid, &uuid_str, NULL);
+#else
     uuid_generate (uuid);
     uuid_unparse_lower (uuid, uuid_str);
+#endif
 
     return uuid_str;
 }
