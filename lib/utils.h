@@ -324,4 +324,8 @@ gint64 ccnet_calc_directory_size (const char *path, GError **error);
 char * strtok_r(char *s, const char *delim, char **save_ptr);
 #endif
 
+#ifndef WIN32
+void ccnet_daemonize (void);
+#endif
+
 #endif
