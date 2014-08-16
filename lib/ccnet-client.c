@@ -8,6 +8,8 @@
 #include <dirent.h>
 #include <stdio.h>
 
+#include <event2/util.h>
+
 #ifdef WIN32
     #include <inttypes.h>
     #include <winsock2.h>
@@ -234,8 +236,10 @@ ccnet_client_connect_daemon (CcnetClient *client, CcnetClientMode mode)
     servaddr.sin_family = AF_INET;
     servaddr.sin_port = htons (client->daemon_port);
     ccnet_util_inet_pton (AF_INET, "127.0.0.1", &servaddr.sin_addr);
-    if (connect (sockfd, (struct sockaddr *) &servaddr, (socklen_t)sizeof(servaddr)) < 0)
+    if (connect (sockfd, (struct sockaddr *) &servaddr, (socklen_t)sizeof(servaddr)) < 0) {
+        evutil_closesocket (sockfd);
         return -1;
+    }
 #else
     char *un_path = NULL;
 
@@ -249,8 +253,12 @@ ccnet_client_connect_daemon (CcnetClient *client, CcnetClientMode mode)
         un_path = g_strdup(client->un_path);
 
     g_strlcpy (servaddr.sun_path, un_path, sizeof(servaddr.sun_path));
+    g_message ("Unix socket path: %s.\n", servaddr.sun_path);
     g_free (un_path);
     if (connect(sockfd, (struct sockaddr *)&servaddr, (socklen_t)sizeof(servaddr)) < 0) {
+        g_warning ("Failed to connect unix socket %s: %s.\n",
+                   servaddr.sun_path, strerror(errno));
+        close (sockfd);
         return -1;
     }
 #endif
