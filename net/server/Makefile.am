@@ -1,5 +1,5 @@
 
-AM_CPPFLAGS = @GLIB2_CFLAGS@ @GOBJECT_CFLAGS@ \
+AM_CPPFLAGS = @GLIB2_CFLAGS@ @SSL_CFLAGS@ @GOBJECT_CFLAGS@ \
 	-DCCNET_SERVER \
 	-I$(top_srcdir)/net/common \
 	-I$(top_srcdir)/include -I$(top_srcdir)/include/ccnet \
