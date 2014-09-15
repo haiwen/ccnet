@@ -1,5 +1,5 @@
 
-AM_CPPFLAGS = -I$(top_srcdir)/include @GLIB2_CFLAGS@ -I$(top_srcdir)/lib
+AM_CPPFLAGS = -I$(top_srcdir)/include @SSL_CFLAGS@ @GLIB2_CFLAGS@ -I$(top_srcdir)/lib
 
 bin_PROGRAMS = ccnet-init
 
