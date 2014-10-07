@@ -21,7 +21,6 @@
 
 
 #include <glib.h>
-#include <evutil.h>
 
 #include "packet.h"
 #include "packet-io.h"
