@@ -1074,23 +1074,9 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
     return g_list_reverse (ret);
 }
 
-static char *
-db_pattern_to_ldap_pattern (const char *db_pattern)
-{
-    char *ldap_patt = g_strdup(db_pattern);
-    char *ptr;
-
-    for (ptr = ldap_patt; *ptr != 0; ++ptr) {
-        if (*ptr == '%')
-            *ptr = '*';
-    }
-
-    return ldap_patt;
-}
-
 GList*
 ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
-                                      const char *email_patt,
+                                      const char *keyword,
                                       int start, int limit)
 {
     CcnetDB *db = manager->priv->db;
@@ -1098,11 +1084,13 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
 
 #ifdef HAVE_LDAP
     if (manager->use_ldap) {
-        char *ldap_patt = db_pattern_to_ldap_pattern (email_patt);
+        char *ldap_patt = g_strdup_printf ("*%s*", keyword);
         ret = ldap_list_users (manager, ldap_patt, -1, -1);
         g_free (ldap_patt);
     }
 #endif
+
+    char *db_patt = g_strdup_printf ("%%%s%%", keyword);
 
     int rc;
     if (start == -1 && limit == -1)
@@ -1115,7 +1103,7 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
                                              "WHERE t1.Email LIKE ? "
                                              "ORDER BY t1.id",
                                              get_emailusers_cb, &ret,
-                                             1, "string", email_patt);
+                                             1, "string", db_patt);
     else
         rc = ccnet_db_statement_foreach_row (db,
                                              "SELECT t1.id, t1.email, "
@@ -1126,9 +1114,9 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
                                              "WHERE t1.Email LIKE ? "
                                              "ORDER BY t1.id LIMIT ? OFFSET ?",
                                              get_emailusers_cb, &ret,
-                                             3, "string", email_patt,
+                                             3, "string", db_patt,
                                              "int", limit, "int", start);
-    
+    g_free (db_patt);
     if (rc < 0) {
         while (ret != NULL) {
             g_object_unref (ret->data);
