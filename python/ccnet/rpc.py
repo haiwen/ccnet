@@ -203,8 +203,8 @@ class CcnetThreadedRpcClient(RpcClientBase):
     def search_emailusers(self, email_patt):
         pass
     
-    @searpc_func("int64", [])
-    def count_emailusers(self):
+    @searpc_func("int64", ["string"])
+    def count_emailusers(self, source):
         pass
 
     @searpc_func("objlist", ["string"])

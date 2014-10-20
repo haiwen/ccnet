@@ -99,7 +99,7 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
                                       int start, int limit);
 
 gint64
-ccnet_user_manager_count_emailusers (CcnetUserManager *manager);
+ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *source);
 
 GList*
 ccnet_user_manager_filter_emailusers_by_emails(CcnetUserManager *manager,

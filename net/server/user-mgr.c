@@ -104,13 +104,6 @@ ccnet_user_manager_prepare (CcnetUserManager *manager)
     if (ret < 0)
         return ret;
 
-    manager->priv->cur_users = ccnet_user_manager_count_emailusers (manager);
-    if (manager->priv->max_users != 0
-        && manager->priv->cur_users > manager->priv->max_users) {
-        ccnet_warning ("The number of users exceeds limit, max %d, current %d\n",
-                       manager->priv->max_users, manager->priv->cur_users);
-        return -1;
-    }
     return 0;
 }
 
@@ -1130,28 +1123,30 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
 
 
 gint64
-ccnet_user_manager_count_emailusers (CcnetUserManager *manager)
+ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *source)
 {
     CcnetDB* db = manager->priv->db;
     char sql[512];
-    gint64 count = 0, ret;
+    gint64 ret;
 
 #ifdef HAVE_LDAP
-    if (manager->use_ldap) {
+    if (manager->use_ldap && g_strcmp0(source, "LDAP") == 0) {
         gint64 ret = ldap_count_users (manager, "*");
         if (ret < 0)
             return -1;
-        count += (gint64) ret;
+        return ret;
     }
 #endif
 
-    snprintf (sql, 512, "SELECT COUNT(*) FROM EmailUser");
+    if (g_strcmp0 (source, "DB") != 0)
+        return -1;
+
+    snprintf (sql, 512, "SELECT COUNT(id) FROM EmailUser");
 
     ret = ccnet_db_get_int64 (db, sql);
     if (ret < 0)
         return -1;
-    count += ret;
-    return count;
+    return ret;
 }
 
 #if 0

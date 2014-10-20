@@ -112,7 +112,7 @@ ccnet_rpc_search_emailusers (const char *email_patt, int start, int limit,
 
 /* Get total counts of email users. */
 gint64
-ccnet_rpc_count_emailusers (GError **error);
+ccnet_rpc_count_emailusers (const char *source, GError **error);
 
 /**
  * Select multiple users according to the given emails.
