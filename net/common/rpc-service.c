@@ -684,6 +684,9 @@ ccnet_rpc_validate_emailuser (const char *email, const char *passwd, GError **er
         return -1;
     }
 
+    if (passwd[0] == 0)
+        return -1;
+
     ret = ccnet_user_manager_validate_emailuser (user_mgr, email, passwd);
 
     return ret;
