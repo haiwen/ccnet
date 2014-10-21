@@ -653,3 +653,19 @@ ccnet_org_manager_unset_org_staff (CcnetOrgManager *mgr,
                                      "WHERE org_id=? AND email=?", 2,
                                      "int", org_id, "string", email);
 }
+
+int
+ccnet_org_manager_set_org_name(CcnetOrgManager *mgr,
+                               int org_id,
+                               const char *org_name,
+                               GError **error)
+{
+    CcnetDB *db = mgr->priv->db;
+
+    return ccnet_db_statement_query (db,
+                                     "UPDATE `Organization` set org_name = ? "
+                                     "WHERE org_id = ?",
+                                     2, "string", org_name, "int", org_id);
+    return 0;
+}
+

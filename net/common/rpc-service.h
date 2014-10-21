@@ -276,6 +276,9 @@ ccnet_rpc_set_org_staff (int org_id, const char *email, GError **error);
 int
 ccnet_rpc_unset_org_staff (int org_id, const char *email, GError **error);
 
+int
+ccnet_rpc_set_org_name (int org_id, const char *org_name, GError **error);
+
 #endif /* CCNET_SERVER */
 
 /**

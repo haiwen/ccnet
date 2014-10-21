@@ -410,5 +410,9 @@ class CcnetThreadedRpcClient(RpcClientBase):
     @searpc_func("int", ["int", "string"])
     def unset_org_staff(self, org_id, user):
         pass
+
+    @searpc_func("int", ["int", "string"])
+    def set_org_name(self, org_id, org_name):
+        pass
     
     

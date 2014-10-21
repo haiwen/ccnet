@@ -337,7 +337,11 @@ ccnet_start_rpc(CcnetSession *session)
                                      ccnet_rpc_unset_org_staff,
                                      "unset_org_staff",
                                      searpc_signature_int__int_string());
-    
+    searpc_server_register_function ("ccnet-threaded-rpcserver",
+                                     ccnet_rpc_set_org_name,
+                                     "set_org_name",
+                                     searpc_signature_int__int_string());
+
 
 #endif  /* CCNET_SERVER */
 
@@ -1457,5 +1461,19 @@ ccnet_rpc_unset_org_staff (int org_id, const char *email, GError **error)
 
     return ccnet_org_manager_unset_org_staff (org_mgr, org_id, email, error);
 }
+
+int
+ccnet_rpc_set_org_name (int org_id, const char *org_name, GError **error)
+{
+    CcnetOrgManager *org_mgr = ((CcnetServerSession *)session)->org_mgr;
+    
+    if (org_id < 0 || !org_name) {
+        g_set_error (error, CCNET_DOMAIN, CCNET_ERR_INTERNAL, "Bad arguments");
+        return -1;
+    }
+
+    return ccnet_org_manager_set_org_name (org_mgr, org_id, org_name, error);
+}
+
 
 #endif  /* CCNET_SERVER */

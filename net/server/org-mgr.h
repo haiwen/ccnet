@@ -129,4 +129,11 @@ ccnet_org_manager_unset_org_staff (CcnetOrgManager *mgr,
                                    const char *email,
                                    GError **error);
 
+int
+ccnet_org_manager_set_org_name(CcnetOrgManager *mgr,
+                               int org_id,
+                               const char *org_name,
+                               GError **error);
+
+
 #endif /* _ORG_MGR_H_ */
