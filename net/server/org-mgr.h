@@ -40,6 +40,9 @@ ccnet_org_manager_get_all_orgs (CcnetOrgManager *mgr,
                                 int start,
                                 int limit);
 
+int
+ccnet_org_manager_count_orgs (CcnetOrgManager *mgr);
+
 CcnetOrganization *
 ccnet_org_manager_get_org_by_url_prefix (CcnetOrgManager *mgr,
                                          const char *url_prefix,

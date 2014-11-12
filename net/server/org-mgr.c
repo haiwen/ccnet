@@ -305,6 +305,21 @@ ccnet_org_manager_get_all_orgs (CcnetOrgManager *mgr,
     return g_list_reverse (ret);
 }
 
+int
+ccnet_org_manager_count_orgs (CcnetOrgManager *mgr)
+{
+    CcnetDB *db = mgr->priv->db;
+    char *sql;
+    gint64 ret;
+
+    sql = "SELECT count(*) FROM Organization";
+
+    ret = ccnet_db_get_int64 (db, sql);
+    if (ret < 0)
+        return -1;
+    return ret;
+}
+
 static gboolean
 get_org_cb (CcnetDBRow *row, void *data)
 {

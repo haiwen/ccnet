@@ -278,6 +278,10 @@ ccnet_start_rpc(CcnetSession *session)
                                      "get_all_orgs",
                                      searpc_signature_objlist__int_int());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
+                                     ccnet_rpc_count_orgs,
+                                     "count_orgs",
+                                     searpc_signature_int64__void());
+    searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_get_org_by_url_prefix,
                                      "get_org_by_url_prefix",
                                      searpc_signature_object__string());
@@ -1218,6 +1222,15 @@ ccnet_rpc_get_all_orgs (int start, int limit, GError **error)
 
     return ret;
 }
+
+gint64
+ccnet_rpc_count_orgs (GError **error)
+{
+    CcnetOrgManager *org_mgr = ((CcnetServerSession *)session)->org_mgr;
+
+    return ccnet_org_manager_count_orgs(org_mgr);
+}
+
 
 GObject *
 ccnet_rpc_get_org_by_url_prefix (const char *url_prefix, GError **error)

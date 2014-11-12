@@ -351,6 +351,10 @@ class CcnetThreadedRpcClient(RpcClientBase):
     def get_all_orgs(self, start, limit):
         pass
 
+    @searpc_func("int64", [])
+    def count_orgs(self):
+        pass
+
     @searpc_func("object", ["string"])
     def get_org_by_url_prefix(self, url_prefix):
         pass

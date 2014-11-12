@@ -229,6 +229,9 @@ ccnet_rpc_remove_org (int org_id, GError **error);
 GList *
 ccnet_rpc_get_all_orgs (int start, int limit, GError **error);
 
+gint64
+ccnet_rpc_count_orgs (GError **error);
+
 GObject *
 ccnet_rpc_get_org_by_url_prefix (const char *url_prefix, GError **error);
 
