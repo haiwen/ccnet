@@ -609,7 +609,9 @@ open_db (CcnetUserManager *manager)
 
 /* -------- EmailUser Management -------- */
 
-/* truly random sequece read from /dev/urandom. */
+/* This fixed salt is used in very early versions. It's kept for compatibility.
+ * For the current password hashing algorithm, please see hash_password_pbkdf2_sha256()
+ */
 static unsigned char salt[8] = { 0xdb, 0x91, 0x45, 0xc3, 0x06, 0xc7, 0xcc, 0x26 };
 
 static void
