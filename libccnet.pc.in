@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: libccnet
 Description: Client library for accessing ccnet service.
 Version: @VERSION@
-Libs: -L${libdir} -lccnet @SEARPC_LIBS@
-Cflags: -I${includedir} @SEARPC_CFLAGS@
+Libs: -L${libdir} -lccnet @SEARPC_LIBS@ @LIBEVENT_LIBS@ @LIB_UUID@
+Cflags: -I${includedir} @SEARPC_CFLAGS@ @LIBEVENT_CFLAGS@
 Requires: gobject-2.0 glib-2.0
