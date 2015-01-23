@@ -171,6 +171,27 @@ AC_CHECK_LIB(pthread, pthread_create, [echo "found library pthread"], AC_MSG_ERR
 AC_CHECK_LIB(sqlite3, sqlite3_open,[echo "found library sqlite3"] , AC_MSG_ERROR([*** Unable to find sqlite3 library]), )
 AC_CHECK_LIB(crypto, SHA1_Init, [echo "found library crypto"], AC_MSG_ERROR([*** Unable to find openssl crypto library]), )
 
+PTHREAD_CFLAGS=-pthread
+PTHREAD_LIBS=-lpthread
+has_winpthread=false
+if test "$bwin32" = "true"; then
+  has_winpthread=false
+  dnl this will tell us if the implementation of pthread is winpthread
+  AC_CHECK_LIB(winpthread, pthread_create, has_winpthread=true,
+               [echo "found library winpthread"], )
+  PTHREAD_CFLAGS=-pthread
+  PTHREAD_LIBS=-lwinpthread
+fi
+
+dnl Saddly, the old mingw gcc doesn't support -pthread flag
+if test "$bwin32" = "true" -a "$has_winpthread" != "true"; then
+  PTHREAD_CFLAGS=
+  PTHREAD_LIBS=-lpthread
+fi
+
+AC_SUBST(PTHREAD_CFLAGS)
+AC_SUBST(PTHREAD_LIBS)
+
 dnl Do we need to use AX_LIB_SQLITE3 to check sqlite?
 dnl AX_LIB_SQLITE3
 
