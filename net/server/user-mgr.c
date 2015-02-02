@@ -777,8 +777,15 @@ ccnet_user_manager_add_emailuser (CcnetUserManager *manager,
         return -1;
     }
 
-    hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter,
-                                 &db_passwd);
+    /* A user with unhashed "!" as password cannot be logged in.
+     * Such users are created for book keeping, such as users from
+     * Shibboleth.
+     */
+    if (g_strcmp0 (passwd, "!") != 0)
+        hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter,
+                                     &db_passwd);
+    else
+        db_passwd = g_strdup(passwd);
 
     /* convert email to lower case for case insensitive lookup. */
     char *email_down = g_ascii_strdown (email, strlen(email));
@@ -840,6 +847,10 @@ ccnet_user_manager_validate_emailuser (CcnetUserManager *manager,
     char *email_down;
     char *stored_passwd = NULL;
     gboolean need_upgrade = FALSE;
+
+    /* Users with password "!" are for internal book keeping only. */
+    if (g_strcmp0 (passwd, "!") == 0)
+        return -1;
 
 #ifdef HAVE_LDAP
     if (manager->use_ldap) {
