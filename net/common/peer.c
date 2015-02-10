@@ -695,8 +695,8 @@ parsed:
          * this side is also not present. Otherwise send SC_PROC_DEAD
          */
         if (memcmp(code, SC_PROC_DEAD, 3) != 0) {
-            ccnet_warning ("Delayed response from %s(%.10s), id is %d, %s %s\n",
-                           peer->name, peer->id, req_id, code, code_msg);
+            ccnet_debug ("Delayed response from %s(%.10s), id is %d, %s %s\n",
+                         peer->name, peer->id, req_id, code, code_msg);
             ccnet_peer_send_update (peer, req_id,
                                     SC_PROC_DEAD, SS_PROC_DEAD,
                                     NULL, 0);
@@ -762,8 +762,8 @@ parsed:
     if (processor == NULL) {
         if (memcmp(code, SC_PROC_DEAD, 3) != 0 
             && memcmp(code, SC_PROC_DONE, 3) != 0) {
-            ccnet_warning ("Delayed update from %s(%.8s), id is %d, %s %s\n",
-                           peer->name, peer->id, req_id, code, code_msg);
+            ccnet_debug ("Delayed update from %s(%.8s), id is %d, %s %s\n",
+                         peer->name, peer->id, req_id, code, code_msg);
             ccnet_peer_send_response (peer, req_id,
                                       SC_PROC_DEAD, SS_PROC_DEAD,
                                       NULL, 0);
