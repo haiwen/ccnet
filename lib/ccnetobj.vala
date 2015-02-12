@@ -44,6 +44,7 @@ public class Group : Object {
     public string group_name { get; set; }
     public string creator_name { get; set; }
     public int64 timestamp { get; set; }
+    public string source { get; set; }
 }
 
 public class GroupUser : Object {

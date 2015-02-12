@@ -162,7 +162,7 @@ ccnet_rpc_verify_message (const char *message,
 
 int
 ccnet_rpc_create_group (const char *group_name, const char *user_name,
-                        GError **error);
+                        const char *type, GError **error);
 
 int
 ccnet_rpc_create_org_group (int org_id, const char *group_name,
@@ -197,7 +197,7 @@ GList *
 ccnet_rpc_get_groups (const char *username, GError **error);
 
 GList *
-ccnet_rpc_get_all_groups (int start, int limit, GError **error);
+ccnet_rpc_get_all_groups (int start, int limit, const char *source, GError **error);
 
 GObject *
 ccnet_rpc_get_group (int group_id, GError **error);

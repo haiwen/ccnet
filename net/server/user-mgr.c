@@ -492,6 +492,14 @@ static int check_db_table (CcnetDB *db)
         if (ccnet_db_query (db, sql) < 0)
             return -1;
 
+        sql = "CREATE TABLE IF NOT EXISTS LDAPUsers ("
+          "id INTEGER PRIMARY KEY AUTO_INCREMENT, "
+          "email VARCHAR(255) NOT NULL, password varchar(255) NOT NULL, "
+          "is_staff BOOL NOT NULL, is_active BOOL NOT NULL, extra_attrs TEXT, "
+          "INDEX(email)) ENGINE=INNODB";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+
     } else if (db_type == CCNET_DB_TYPE_SQLITE) {
         sql = "CREATE TABLE IF NOT EXISTS EmailUser ("
             "id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
@@ -528,6 +536,17 @@ static int check_db_table (CcnetDB *db)
         if (ccnet_db_query (db, sql) < 0)
             return -1;
 
+        sql = "CREATE TABLE IF NOT EXISTS LDAPUsers ("
+          "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+          "email TEXT NOT NULL, password TEXT NOT NULL, "
+          "is_staff BOOL NOT NULL, is_active BOOL NOT NULL, extra_attrs TEXT)";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+
+        sql = "CREATE INDEX IF NOT EXISTS ldapusers_email_index on LDAPUsers(email)";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+
     } else if (db_type == CCNET_DB_TYPE_PGSQL) {
         sql = "CREATE TABLE IF NOT EXISTS EmailUser ("
             "id SERIAL PRIMARY KEY, "
@@ -548,6 +567,19 @@ static int check_db_table (CcnetDB *db)
 
         if (!pgsql_index_exists (db, "userrole_email_idx")) {
             sql = "CREATE INDEX userrole_email_idx ON UserRole (email)";
+            if (ccnet_db_query (db, sql) < 0)
+                return -1;
+        }
+
+        sql = "CREATE TABLE IF NOT EXISTS LDAPUsers ("
+          "id SERIAL PRIMARY KEY, "
+          "email VARCHAR(255) NOT NULL, password VARCHAR(255) NOT NULL, "
+          "is_staff SMALLINT NOT NULL, is_active SMALLINT NOT NULL, extra_attrs TEXT)";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
+
+        if (!pgsql_index_exists (db, "ldapusers_email_idx")) {
+            sql = "CREATE INDEX ldapusers_email_idx ON LDAPUsers (email)";
             if (ccnet_db_query (db, sql) < 0)
                 return -1;
         }

@@ -199,7 +199,7 @@ ccnet_start_rpc(CcnetSession *session)
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_create_group,
                                      "create_group",
-                                     searpc_signature_int__string_string());
+                                     searpc_signature_int__string_string_string());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_create_org_group,
                                      "create_org_group",
@@ -239,7 +239,7 @@ ccnet_start_rpc(CcnetSession *session)
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_get_all_groups,
                                      "get_all_groups",
-                                     searpc_signature_objlist__int_int());
+                                     searpc_signature_objlist__int_int_string());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_get_group,
                                      "get_group",
@@ -849,7 +849,7 @@ ccnet_rpc_verify_message (const char *message,
 
 int
 ccnet_rpc_create_group (const char *group_name, const char *user_name,
-                        GError **error)
+                        const char *type, GError **error)
 {
     CcnetGroupManager *group_mgr = 
         ((CcnetServerSession *)session)->group_mgr;
@@ -1063,7 +1063,8 @@ ccnet_rpc_get_groups (const char *username, GError **error)
 }
 
 GList *
-ccnet_rpc_get_all_groups (int start, int limit, GError **error)
+ccnet_rpc_get_all_groups (int start, int limit,
+                          const char *source, GError **error)
 {
     CcnetGroupManager *group_mgr = 
         ((CcnetServerSession *)session)->group_mgr;

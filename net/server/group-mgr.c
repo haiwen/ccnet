@@ -95,7 +95,8 @@ static int check_db_table (CcnetDB *db)
     if (db_type == CCNET_DB_TYPE_MYSQL) {
         sql = "CREATE TABLE IF NOT EXISTS `Group` (`group_id` INTEGER"
             " PRIMARY KEY AUTO_INCREMENT, `group_name` VARCHAR(255),"
-            " `creator_name` VARCHAR(255), `timestamp` BIGINT)"
+            " `creator_name` VARCHAR(255), `timestamp` BIGINT,"
+            " `type` VARCHAR(32))"
             "ENGINE=INNODB";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
@@ -106,10 +107,16 @@ static int check_db_table (CcnetDB *db)
             "ENGINE=INNODB";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
+
+        sql = "CREATE TABLE IF NOT EXISTS GroupDNPair (group_id INTEGER,"
+            " dn VARCHAR(255))ENGINE=INNODB";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
     } else if (db_type == CCNET_DB_TYPE_SQLITE) {
         sql = "CREATE TABLE IF NOT EXISTS `Group` (`group_id` INTEGER"
             " PRIMARY KEY AUTOINCREMENT, `group_name` VARCHAR(255),"
-            " `creator_name` VARCHAR(255), `timestamp` BIGINT)";
+            " `creator_name` VARCHAR(255), `timestamp` BIGINT,"
+            " `type` VARCHAR(32))";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
 
@@ -127,10 +134,16 @@ static int check_db_table (CcnetDB *db)
             "`GroupUser` (`user_name`)";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
+
+        sql = "CREATE TABLE IF NOT EXISTS GroupDNPair (group_id INTEGER,"
+            " dn VARCHAR(255))";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
     } else if (db_type == CCNET_DB_TYPE_PGSQL) {
         sql = "CREATE TABLE IF NOT EXISTS \"Group\" (group_id SERIAL"
             " PRIMARY KEY, group_name VARCHAR(255),"
-            " creator_name VARCHAR(255), timestamp BIGINT)";
+            " creator_name VARCHAR(255), timestamp BIGINT,"
+            " type VARCHAR(32))";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
 
@@ -145,6 +158,11 @@ static int check_db_table (CcnetDB *db)
             if (ccnet_db_query (db, sql) < 0)
                 return -1;
         }
+
+        sql = "CREATE TABLE IF NOT EXISTS GroupDNPair (group_id INTEGER,"
+            " dn VARCHAR(255))";
+        if (ccnet_db_query (db, sql) < 0)
+            return -1;
     }
 
     return 0;
@@ -571,6 +589,7 @@ get_ccnetgroup_cb (CcnetDBRow *row, void *data)
                              "group_name", group_name,
                              "creator_name", creator_l,
                              "timestamp", ts,
+                             "source", "DB",
                              NULL);
     g_free (creator_l);
 
@@ -692,6 +711,7 @@ get_all_ccnetgroups_cb (CcnetDBRow *row, void *data)
                                       "group_name", group_name,
                                       "creator_name", creator_l,
                                       "timestamp", ts,
+                                      "source", "DB",
                                       NULL);
     g_free (creator_l);
 
