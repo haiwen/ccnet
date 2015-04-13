@@ -231,6 +231,32 @@ static LDAP *ldap_init_and_bind (const char *host,
     return ld;
 }
 
+static int
+add_ldapuser (CcnetDB *db,
+              const char *email,
+              const char *password,
+              gboolean is_staff,
+              gboolean is_active,
+              const char *extra_attrs)
+{
+    int rc;
+
+    if (extra_attrs)
+        rc = ccnet_db_statement_query (db,
+                                       "INSERT INTO LDAPUsers (email, password, is_staff, "
+                                       "is_active, extra_attrs) VALUES (?, ?, ?, ?, ?)",
+                                       5, "string", email, "string", password, "int",
+                                       is_staff, "int", is_active, "string", extra_attrs);
+    else
+        rc = ccnet_db_statement_query (db,
+                                       "INSERT INTO LDAPUsers (email, password, is_staff, "
+                                       "is_active) VALUES (?, ?, ?, ?)", 4, "string", email,
+                                       "string", password, "int", is_staff, "int", is_active);
+
+
+    return rc;
+}
+
 static int ldap_verify_user_password (CcnetUserManager *manager,
                                       const char *uid,
                                       const char *password)
@@ -405,60 +431,6 @@ out:
     g_free (filter_str);
     if (ld) ldap_unbind_s (ld);
     return ret;
-}
-
-/*
- * @uid: user's uid, list all users if * is passed in.
- */
-static int ldap_count_users (CcnetUserManager *manager, const char *uid)
-{
-    LDAP *ld = NULL;
-    int res;
-    GString *filter;
-    char *filter_str;
-    char *attrs[2];
-    LDAPMessage *msg = NULL;
-
-    ld = ldap_init_and_bind (manager->ldap_host,
-#ifdef WIN32
-                             manager->use_ssl,
-#endif
-                             manager->user_dn,
-                             manager->password);
-    if (!ld)
-        return -1;
-
-    filter = g_string_new (NULL);
-    if (!manager->filter)
-        g_string_printf (filter, "(%s=%s)", manager->login_attr, uid);
-    else
-        g_string_printf (filter, "(&(%s=%s) (%s))",
-                         manager->login_attr, uid, manager->filter);
-    filter_str = g_string_free (filter, FALSE);
-
-    attrs[0] = manager->login_attr;
-    attrs[1] = NULL;
-
-    char **base;
-    int count = 0;
-    for (base = manager->base_list; *base; ++base) {
-        res = ldap_search_s (ld, *base, LDAP_SCOPE_SUBTREE,
-                             filter_str, attrs, 0, &msg);
-        if (res != LDAP_SUCCESS) {
-            ccnet_warning ("ldap_search failed: %s.\n", ldap_err2string(res));
-            ldap_msgfree (msg);
-            count = -1;
-            goto out;
-        }
-
-        count += ldap_count_entries (ld, msg);
-        ldap_msgfree (msg);
-    }
-
-out:
-    g_free (filter_str);
-    if (ld) ldap_unbind_s (ld);
-    return count;
 }
 
 #endif  /* HAVE_LDAP */
@@ -955,6 +927,27 @@ static char*
 ccnet_user_manager_get_role_emailuser (CcnetUserManager *manager,
                                      const char* email);
 
+static gboolean
+get_ldap_emailuser_cb (CcnetDBRow *row, void *data)
+{
+    CcnetEmailUser **p_emailuser = data;
+
+    const char *email = (const char *)ccnet_db_row_get_column_text (row, 0);
+    int is_staff = ccnet_db_row_get_column_int (row, 1);
+    int is_active = ccnet_db_row_get_column_int (row, 2);
+
+    *p_emailuser = g_object_new (CCNET_TYPE_EMAIL_USER,
+                                 "id", 0,
+                                 "email", email,
+                                 "is_staff", is_staff,
+                                 "is_active", is_active,
+                                 "ctime", (gint64)0,
+                                 "source", "LDAPImport",
+                                 NULL);
+
+    return FALSE;
+}
+
 CcnetEmailUser*
 ccnet_user_manager_get_emailuser (CcnetUserManager *manager,
                                   const char *email)
@@ -987,30 +980,67 @@ ccnet_user_manager_get_emailuser (CcnetUserManager *manager,
         g_free (email_down);
         return emailuser;
     }
-    g_free (email_down);
 
 #ifdef HAVE_LDAP
     if (manager->use_ldap) {
-        GList *users, *ptr;
-
-        users = ldap_list_users (manager, email, -1, -1);
-        if (!users)
+        int ret = ccnet_db_statement_foreach_row (db,
+                                                  "SELECT email, is_staff, is_active "
+                                                  "FROM LDAPUsers WHERE email = ?",
+                                                  get_ldap_emailuser_cb,
+                                                  &emailuser, 1, "string", email_down);
+        if (ret < 0) {
+            ccnet_warning ("get ldapuser from db failed.\n");
+            g_free (email_down);
             return NULL;
-        emailuser = users->data;
+        }
 
-        /* Free all except the first user. */
-        for (ptr = users->next; ptr; ptr = ptr->next)
-            g_object_unref (ptr->data);
-        g_list_free (users);
+        if (!emailuser) {
+            GList *users, *ptr;
 
-        char *role = ccnet_user_manager_get_role_emailuser(manager, email);
+            users = ldap_list_users (manager, email, -1, -1);
+            if (!users) {
+                g_free (email_down);
+                return NULL;
+            }
+            emailuser = users->data;
+
+            /* Free all except the first user. */
+            for (ptr = users->next; ptr; ptr = ptr->next)
+                g_object_unref (ptr->data);
+            g_list_free (users);
+
+            if (manager->priv->max_users &&
+                manager->priv->cur_users >= manager->priv->max_users) {
+                ccnet_warning ("User number exceeds limit. Users %d, limit %d.\n",
+                               manager->priv->cur_users, manager->priv->max_users);
+                g_free (email_down);
+                g_object_unref (emailuser);
+                return NULL;
+            }
+
+            // add user to LDAPUsers
+            if (add_ldapuser (manager->priv->db, email_down, "",
+                              FALSE, TRUE, NULL) < 0) {
+                ccnet_warning ("add ldapuser to db failed.\n");
+                g_free (email_down);
+                g_object_unref (emailuser);
+                return NULL;
+            }
+
+            ++manager->priv->cur_users;
+        }
+
+        char *role = ccnet_user_manager_get_role_emailuser(manager, email_down);
         if (role) {
             g_object_set (emailuser, "role", role, NULL);
             g_free (role);
         }
+        g_free (email_down);
         return emailuser;
     }
 #endif
+
+    g_free (email_down);
 
     return NULL;
 }
@@ -1052,9 +1082,37 @@ get_emailusers_cb (CcnetDBRow *row, void *data)
                               "is_active", is_active,
                               "ctime", ctime,
                               "role", role ? role : "",
-                              "source", "DB", 
+                              "source", "DB",
                               NULL);
     g_free (email_l);
+
+    *plist = g_list_prepend (*plist, emailuser);
+
+    return TRUE;
+}
+
+static gboolean
+get_ldap_emailusers_cb (CcnetDBRow *row, void *data)
+{
+    GList **plist = data;
+    CcnetEmailUser *emailuser = NULL;
+
+    const char *email = (const char *)ccnet_db_row_get_column_text (row, 0);
+    int is_staff = ccnet_db_row_get_column_int (row, 1);
+    int is_active = ccnet_db_row_get_column_int (row, 2);
+    const char *role = ccnet_db_row_get_column_text (row, 3);
+
+    emailuser = g_object_new (CCNET_TYPE_EMAIL_USER,
+                              "id", 0,
+                              "email", email,
+                              "is_staff", is_staff,
+                              "is_active", is_active,
+                              "ctime", (gint64)0,
+                              "role", role ? role : "",
+                              "source", "LDAPImport",
+                              NULL);
+    if (!emailuser)
+        return FALSE;
 
     *plist = g_list_prepend (*plist, emailuser);
 
@@ -1068,19 +1126,49 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
 {
     CcnetDB *db = manager->priv->db;
     GList *ret = NULL;
+    int rc;
 
 #ifdef HAVE_LDAP
-    if (manager->use_ldap && g_strcmp0 (source, "LDAP") == 0) {
-        GList *users;
-        users = ldap_list_users (manager, "*", start, limit);
-        return g_list_reverse (users);
+    if (manager->use_ldap) {
+        GList *users = NULL;
+
+        if (g_strcmp0 (source, "LDAP") == 0) {
+            users = ldap_list_users (manager, "*", start, limit);
+            return g_list_reverse (users);
+        } else if (g_strcmp0 (source, "LDAPImport") == 0) {
+            if (start == -1 && limit == -1) {
+                rc = ccnet_db_statement_foreach_row (db,
+                                                     "SELECT t1.email, t1.is_staff, "
+                                                     "t1.is_active, t2.role "
+                                                     "FROM LDAPUsers t1 LEFT JOIN UserRole t2 "
+                                                     "ON t1.email = t2.email",
+                                                     get_ldap_emailusers_cb,
+                                                     &users, 0);
+            } else {
+                rc = ccnet_db_statement_foreach_row (db,
+                                                     "SELECT t1.email, t1.is_staff, "
+                                                     "t1.is_active, t2.role "
+                                                     "FROM LDAPUsers t1 LEFT JOIN UserRole t2 "
+                                                     "ON t1.email = t2.email LIMIT ?, ?",
+                                                     get_ldap_emailusers_cb,
+                                                     &users, 2, "int", start, "int", limit);
+            }
+
+            if (rc < 0) {
+                while (users) {
+                    g_object_unref (users->data);
+                    users = g_list_delete_link (users, users);
+                }
+                return NULL;
+            }
+            return g_list_reverse (users);
+        }
     }
 #endif
 
     if (g_strcmp0 (source, "DB") != 0)
         return NULL;
 
-    int rc;
     if (start == -1 && limit == -1)
         rc = ccnet_db_statement_foreach_row (db,
                                              "SELECT t1.id, t1.email, "
@@ -1166,7 +1254,6 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
     return g_list_reverse (ret);
 }
 
-
 gint64
 ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *source)
 {
@@ -1176,7 +1263,7 @@ ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *sour
 
 #ifdef HAVE_LDAP
     if (manager->use_ldap && g_strcmp0(source, "LDAP") == 0) {
-        gint64 ret = ldap_count_users (manager, "*");
+        gint64 ret = ccnet_db_get_int64 (db, "SELECT COUNT(id) FROM LDAPUsers");
         if (ret < 0)
             return -1;
         return ret;
