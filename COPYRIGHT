@@ -29,18 +29,8 @@ also delete it here.
 
 Some individual files have their speicific license:
 
-* Section of lib/libccnet_utils.c and lib/utils.c
-
- Copyright (c) 2004 by Internet Systems Consortium, Inc. ("ISC")
- Copyright (c) 1996-1999 by Internet Software Consortium.
-
 * lib/buffer.c is from libevent, so it has a BSD-3-clause license.
 
  Copyright (c) 2002-2007 Niels Provos <provos@citi.umich.edu>
  Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
 
-* net/common/getgateway.c is from libnatpmp, so it has a BSD-3-clause license
-
- Copyright (c) 2007-2011, Thomas BERNARD
-
-* net/common/list.h is a linux kernel header, so it has a GPL-2 license.
