@@ -415,6 +415,7 @@ static GList *ldap_list_users (CcnetUserManager *manager, const char *uid,
                                  "is_active", TRUE,
                                  "ctime", (gint64)0,
                                  "source", "LDAP",
+                                 "password", "!",
                                  NULL);
             g_free (email_l);
             ret = g_list_prepend (ret, user);
@@ -908,6 +909,7 @@ get_emailuser_cb (CcnetDBRow *row, void *data)
     int is_staff = ccnet_db_row_get_column_int (row, 2);
     int is_active = ccnet_db_row_get_column_int (row, 3);
     gint64 ctime = ccnet_db_row_get_column_int64 (row, 4);
+    const char *password = ccnet_db_row_get_column_text (row, 5);
 
     char *email_l = g_ascii_strdown (email, -1);
     *p_emailuser = g_object_new (CCNET_TYPE_EMAIL_USER,
@@ -917,6 +919,7 @@ get_emailuser_cb (CcnetDBRow *row, void *data)
                                  "is_active", is_active,
                                  "ctime", ctime,
                                  "source", "DB",
+                                 "password", password,
                                  NULL);
     g_free (email_l);
 
@@ -943,6 +946,7 @@ get_ldap_emailuser_cb (CcnetDBRow *row, void *data)
                                  "is_active", is_active,
                                  "ctime", (gint64)0,
                                  "source", "LDAPImport",
+                                 "password", "!",
                                  NULL);
 
     return FALSE;
@@ -957,7 +961,7 @@ ccnet_user_manager_get_emailuser (CcnetUserManager *manager,
     CcnetEmailUser *emailuser = NULL;
     char *email_down;
 
-    sql = "SELECT id, email, is_staff, is_active, ctime"
+    sql = "SELECT id, email, is_staff, is_active, ctime, passwd"
         " FROM EmailUser WHERE email=?";
     if (ccnet_db_statement_foreach_row (db, sql, get_emailuser_cb, &emailuser,
                                         1, "string", email) > 0) {
@@ -1052,7 +1056,7 @@ ccnet_user_manager_get_emailuser_by_id (CcnetUserManager *manager, int id)
     char *sql;
     CcnetEmailUser *emailuser = NULL;
 
-    sql = "SELECT id, email, is_staff, is_active, ctime"
+    sql = "SELECT id, email, is_staff, is_active, ctime, passwd"
         " FROM EmailUser WHERE id=?";
     if (ccnet_db_statement_foreach_row (db, sql, get_emailuser_cb, &emailuser,
                                         1, "int", id) < 0)
@@ -1073,6 +1077,7 @@ get_emailusers_cb (CcnetDBRow *row, void *data)
     int is_active = ccnet_db_row_get_column_int (row, 3);
     gint64 ctime = ccnet_db_row_get_column_int64 (row, 4);
     const char *role = (const char *)ccnet_db_row_get_column_text (row, 5);
+    const char *password = ccnet_db_row_get_column_text (row, 6);
 
     char *email_l = g_ascii_strdown (email, -1);
     emailuser = g_object_new (CCNET_TYPE_EMAIL_USER,
@@ -1083,6 +1088,7 @@ get_emailusers_cb (CcnetDBRow *row, void *data)
                               "ctime", ctime,
                               "role", role ? role : "",
                               "source", "DB",
+                              "password", password,
                               NULL);
     g_free (email_l);
 
@@ -1110,6 +1116,7 @@ get_ldap_emailusers_cb (CcnetDBRow *row, void *data)
                               "ctime", (gint64)0,
                               "role", role ? role : "",
                               "source", "LDAPImport",
+                              "password", "!",
                               NULL);
     if (!emailuser)
         return FALSE;
@@ -1173,7 +1180,7 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
         rc = ccnet_db_statement_foreach_row (db,
                                              "SELECT t1.id, t1.email, "
                                              "t1.is_staff, t1.is_active, t1.ctime, "
-                                             "t2.role FROM EmailUser AS t1 "
+                                             "t2.role, t1.passwd FROM EmailUser AS t1 "
                                              "LEFT JOIN UserRole AS t2 "
                                              "ON t1.email = t2.email ",
                                              get_emailusers_cb, &ret,
@@ -1182,7 +1189,7 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
         rc = ccnet_db_statement_foreach_row (db,
                                              "SELECT t1.id, t1.email, "
                                              "t1.is_staff, t1.is_active, t1.ctime, "
-                                             "t2.role FROM EmailUser AS t1 "
+                                             "t2.role, t1.passwd FROM EmailUser AS t1 "
                                              "LEFT JOIN UserRole AS t2 "
                                              "ON t1.email = t2.email "
                                              "ORDER BY t1.id LIMIT ? OFFSET ?",
@@ -1202,6 +1209,7 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
 
 GList*
 ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
+                                      const char *source,
                                       const char *keyword,
                                       int start, int limit)
 {
@@ -1210,11 +1218,18 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
 
 #ifdef HAVE_LDAP
     if (manager->use_ldap) {
-        char *ldap_patt = g_strdup_printf ("*%s*", keyword);
-        ret = ldap_list_users (manager, ldap_patt, -1, -1);
-        g_free (ldap_patt);
+        if (strcmp (source, "LDAP") == 0) {
+            char *ldap_patt = g_strdup_printf ("*%s*", keyword);
+            ret = ldap_list_users (manager, ldap_patt, start, limit);
+            g_free (ldap_patt);
+            return ret;
+        }
     }
 #endif
+
+    if (strcmp (source, "DB") !=0) {
+        return NULL;
+    }
 
     char *db_patt = g_strdup_printf ("%%%s%%", keyword);
 
@@ -1223,7 +1238,7 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
         rc = ccnet_db_statement_foreach_row (db,
                                              "SELECT t1.id, t1.email, "
                                              "t1.is_staff, t1.is_active, t1.ctime, "
-                                             "t2.role FROM EmailUser AS t1 "
+                                             "t2.role, t1.passwd FROM EmailUser AS t1 "
                                              "LEFT JOIN UserRole AS t2 "
                                              "ON t1.email = t2.email "
                                              "WHERE t1.Email LIKE ? "
@@ -1234,7 +1249,7 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
         rc = ccnet_db_statement_foreach_row (db,
                                              "SELECT t1.id, t1.email, "
                                              "t1.is_staff, t1.is_active, t1.ctime, "
-                                             "t2.role FROM EmailUser AS t1 "
+                                             "t2.role, t1.passwd FROM EmailUser AS t1 "
                                              "LEFT JOIN UserRole AS t2 "
                                              "ON t1.email = t2.email "
                                              "WHERE t1.Email LIKE ? "
@@ -1398,7 +1413,7 @@ ccnet_user_manager_get_superusers(CcnetUserManager *manager)
     snprintf (sql, 512,
               "SELECT t1.id, t1.email, "
               "t1.is_staff, t1.is_active, t1.ctime, "
-              "t2.role FROM EmailUser AS t1 "
+              "t2.role, t1.passwd FROM EmailUser AS t1 "
               "LEFT JOIN UserRole AS t2 "
               "ON t1.email = t2.email "
               "WHERE is_staff = 1;");

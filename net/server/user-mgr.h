@@ -95,6 +95,7 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager, const char *source
 
 GList*
 ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
+                                      const char *source,
                                       const char *keyword,
                                       int start, int limit);
 

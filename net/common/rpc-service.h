@@ -107,7 +107,8 @@ GList*
 ccnet_rpc_get_emailusers (const char *source, int start, int limit, GError **error);
 
 GList*
-ccnet_rpc_search_emailusers (const char *email_patt, int start, int limit,
+ccnet_rpc_search_emailusers (const char *source, const char *email_patt,
+                             int start, int limit,
                              GError **error);
 
 /* Get total counts of email users. */
