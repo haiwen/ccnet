@@ -36,6 +36,7 @@ public class EmailUser : Object {
     public int64 ctime { get; set; }
     public string source { get; set; }
     public string role { get; set; }
+    public string password { get; set; }
 }
 
 public class Group : Object {
