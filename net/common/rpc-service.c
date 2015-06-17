@@ -733,7 +733,8 @@ ccnet_rpc_get_emailusers (const char *source, int start, int limit, GError **err
 }
 
 GList*
-ccnet_rpc_search_emailusers (const char *source, const char *email_patt,
+ccnet_rpc_search_emailusers (const char *source,
+                             const char *email_patt,
                              int start, int limit,
                              GError **error)
 {
@@ -741,7 +742,8 @@ ccnet_rpc_search_emailusers (const char *source, const char *email_patt,
         ((CcnetServerSession *)session)->user_mgr;
     GList *emailusers = NULL;
 
-    emailusers = ccnet_user_manager_search_emailusers (user_mgr, source,
+    emailusers = ccnet_user_manager_search_emailusers (user_mgr,
+                                                       source,
                                                        email_patt,
                                                        start, limit);
     
@@ -772,13 +774,15 @@ ccnet_rpc_filter_emailusers_by_emails (const char *emails, GError **error)
 #endif
 
 int
-ccnet_rpc_update_emailuser (int id, const char* passwd, int is_staff, int is_active,
+ccnet_rpc_update_emailuser (int id, const char* passwd,
+                            int is_staff, int is_active,
                             GError **error)
 {
     CcnetUserManager *user_mgr =
         ((CcnetServerSession *)session)->user_mgr;
 
-    return ccnet_user_manager_update_emailuser(user_mgr, id, passwd, is_staff, is_active);
+    return ccnet_user_manager_update_emailuser(user_mgr, id, passwd,
+                                               is_staff, is_active);
 }
 
 int
