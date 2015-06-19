@@ -832,11 +832,17 @@ ccnet_user_manager_remove_emailuser (CcnetUserManager *manager,
     ret = ccnet_db_statement_query (db,
                                     "DELETE FROM EmailUser WHERE email=?",
                                     1, "string", email);
+    if (ret < 0)
+        return ret;
 
+    ret = ccnet_db_statement_query (db,
+                                    "DELETE FROM LDAPUsers WHERE email=?",
+                                    1, "string", email);
     if (ret < 0)
         return ret;
 
     manager->priv->cur_users --;
+
     return 0;
 }
 
@@ -1377,26 +1383,40 @@ ccnet_user_manager_filter_emailusers_by_emails(CcnetUserManager *manager,
 
 int
 ccnet_user_manager_update_emailuser (CcnetUserManager *manager,
+                                     const char *source,
                                      int id, const char* passwd,
                                      int is_staff, int is_active)
 {
     CcnetDB* db = manager->priv->db;
     char *db_passwd = NULL;
 
-    if (g_strcmp0 (passwd, "!") == 0) {
-        /* Don't update passwd if it starts with '!' */
-        return ccnet_db_statement_query (db, "UPDATE EmailUser SET is_staff=?, "
+    if (strcmp (source, "DB") == 0) {
+        if (g_strcmp0 (passwd, "!") == 0) {
+            /* Don't update passwd if it starts with '!' */
+            return ccnet_db_statement_query (db, "UPDATE EmailUser SET is_staff=?, "
+                                             "is_active=? WHERE id=?",
+                                             3, "int", is_staff, "int", is_active,
+                                             "int", id);
+        } else {
+            hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter, &db_passwd);
+
+            return ccnet_db_statement_query (db, "UPDATE EmailUser SET passwd=?, "
+                                             "is_staff=?, is_active=? WHERE id=?",
+                                             4, "string", db_passwd, "int", is_staff,
+                                             "int", is_active, "int", id);
+        }
+    }
+
+#ifdef HAVE_LDAP
+    if (manager->use_ldap && strcmp (source, "LDAP") == 0) {
+        return ccnet_db_statement_query (db, "UPDATE LDAPUsers SET is_staff=?, "
                                          "is_active=? WHERE id=?",
                                          3, "int", is_staff, "int", is_active,
                                          "int", id);
-    } else {
-        hash_password_pbkdf2_sha256 (passwd, manager->passwd_hash_iter, &db_passwd);
-
-        return ccnet_db_statement_query (db, "UPDATE EmailUser SET passwd=?, "
-                                         "is_staff=?, is_active=? WHERE id=?",
-                                         4, "string", db_passwd, "int", is_staff,
-                                         "int", is_active, "int", id);
     }
+#endif
+
+    return -1;
 }
 
 static gboolean

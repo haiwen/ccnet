@@ -125,7 +125,7 @@ GList*
 ccnet_rpc_filter_emailusers_by_emails (const char *emails, GError **error);
 
 int
-ccnet_rpc_update_emailuser (int id, const char* passwd,
+ccnet_rpc_update_emailuser (const char *source, int id, const char* passwd,
                             int is_staff, int is_active,
                             GError **error);
 
