@@ -174,7 +174,7 @@ ccnet_start_rpc(CcnetSession *session)
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_update_emailuser,
                                      "update_emailuser",
-                                     searpc_signature_int__int_string_int_int());
+                                     searpc_signature_int__string_int_string_int_int());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_update_role_emailuser,
                                      "update_role_emailuser",
@@ -774,14 +774,14 @@ ccnet_rpc_filter_emailusers_by_emails (const char *emails, GError **error)
 #endif
 
 int
-ccnet_rpc_update_emailuser (int id, const char* passwd,
+ccnet_rpc_update_emailuser (const char *source, int id, const char* passwd,
                             int is_staff, int is_active,
                             GError **error)
 {
     CcnetUserManager *user_mgr =
         ((CcnetServerSession *)session)->user_mgr;
 
-    return ccnet_user_manager_update_emailuser(user_mgr, id, passwd,
+    return ccnet_user_manager_update_emailuser(user_mgr, source, id, passwd,
                                                is_staff, is_active);
 }
 

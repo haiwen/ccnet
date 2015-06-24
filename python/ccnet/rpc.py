@@ -211,8 +211,8 @@ class CcnetThreadedRpcClient(RpcClientBase):
     def filter_emailusers_by_emails(self):
         pass
     
-    @searpc_func("int", ["int", "string", "int", "int"])
-    def update_emailuser(self, user_id, password, is_staff, is_active):
+    @searpc_func("int", ["string", "int", "string", "int", "int"])
+    def update_emailuser(self, source, user_id, password, is_staff, is_active):
         pass
 
     @searpc_func("int", ["string", "string"])

@@ -108,6 +108,7 @@ ccnet_user_manager_filter_emailusers_by_emails(CcnetUserManager *manager,
 
 int
 ccnet_user_manager_update_emailuser (CcnetUserManager *manager,
+                                     const char *source,
                                      int id, const char* passwd,
                                      int is_staff, int is_active);
 
