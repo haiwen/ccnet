@@ -92,7 +92,7 @@ ccnet_rpc_add_emailuser (const char *email, const char *passwd,
                          int is_staff, int is_active, GError **error);
 
 int
-ccnet_rpc_remove_emailuser (const char *email, GError **error);
+ccnet_rpc_remove_emailuser (const char *source, const char *email, GError **error);
 
 int
 ccnet_rpc_validate_emailuser (const char *email, const char *passwd, GError **error);

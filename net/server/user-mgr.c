@@ -820,6 +820,7 @@ ccnet_user_manager_add_emailuser (CcnetUserManager *manager,
 
 int
 ccnet_user_manager_remove_emailuser (CcnetUserManager *manager,
+                                     const char *source,
                                      const char *email)
 {
     CcnetDB *db = manager->priv->db;
@@ -829,21 +830,33 @@ ccnet_user_manager_remove_emailuser (CcnetUserManager *manager,
                               "DELETE FROM UserRole WHERE email=?",
                               1, "string", email);
 
-    ret = ccnet_db_statement_query (db,
-                                    "DELETE FROM EmailUser WHERE email=?",
-                                    1, "string", email);
-    if (ret < 0)
-        return ret;
+    if (strcmp (source, "DB") == 0) {
+        ret = ccnet_db_statement_query (db,
+                                        "DELETE FROM EmailUser WHERE email=?",
+                                        1, "string", email);
+        if (ret < 0) {
+            return ret;
+        } else {
+            manager->priv->cur_users --;
+            return 0;
+        }
+    }
 
-    ret = ccnet_db_statement_query (db,
-                                    "DELETE FROM LDAPUsers WHERE email=?",
-                                    1, "string", email);
-    if (ret < 0)
-        return ret;
+#ifdef HAVE_LDAP
+    if (strcmp (source, "LDAP") == 0 && manager->use_ldap) {
+        ret = ccnet_db_statement_query (db,
+                                        "DELETE FROM LDAPUsers WHERE email=?",
+                                        1, "string", email);
+        if (ret < 0) {
+            return ret;
+        } else {
+            manager->priv->cur_users --;
+            return 0;
+        }
+    }
+#endif
 
-    manager->priv->cur_users --;
-
-    return 0;
+    return -1;
 }
 
 static gboolean
@@ -1477,6 +1490,21 @@ ccnet_user_manager_get_superusers(CcnetUserManager *manager)
               "WHERE is_staff = 1;");
 
     if (ccnet_db_foreach_selected_row (db, sql, get_emailusers_cb, &ret) < 0) {
+        while (ret != NULL) {
+            g_object_unref (ret->data);
+            ret = g_list_delete_link (ret, ret);
+        }
+        return NULL;
+    }
+
+    if (ccnet_db_foreach_selected_row (db,
+                                       "SELECT t1.id, t1.email, "
+                                       "t1.is_staff, t1.is_active, "
+                                       "t2.role FROM LDAPUsers AS t1 "
+                                       "LEFT JOIN UserRole AS t2 "
+                                       "ON t1.email = t2.email "
+                                       "WHERE is_staff = 1",
+                                       get_ldap_emailusers_cb, &ret) < 0) {
         while (ret != NULL) {
             g_object_unref (ret->data);
             ret = g_list_delete_link (ret, ret);

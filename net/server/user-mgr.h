@@ -73,6 +73,7 @@ ccnet_user_manager_add_emailuser (CcnetUserManager *manager,
 
 int
 ccnet_user_manager_remove_emailuser (CcnetUserManager *manager,
+                                     const char *source,
                                      const char *email);
 
 int

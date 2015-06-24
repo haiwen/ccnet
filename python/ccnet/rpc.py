@@ -179,8 +179,8 @@ class CcnetThreadedRpcClient(RpcClientBase):
     def add_emailuser(self, email, passwd, is_staff, is_active):
         pass
     
-    @searpc_func("int", ["string"])
-    def remove_emailuser(self, email):
+    @searpc_func("int", ["string", "string"])
+    def remove_emailuser(self, source, email):
         pass
     
     @searpc_func("int", ["string", "string"])

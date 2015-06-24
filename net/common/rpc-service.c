@@ -146,7 +146,7 @@ ccnet_start_rpc(CcnetSession *session)
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_remove_emailuser,
                                      "remove_emailuser",
-                                     searpc_signature_int__string());
+                                     searpc_signature_int__string_string());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_validate_emailuser,
                                      "validate_emailuser",
@@ -660,7 +660,7 @@ ccnet_rpc_add_emailuser (const char *email, const char *passwd,
 }
 
 int
-ccnet_rpc_remove_emailuser (const char *email, GError **error)
+ccnet_rpc_remove_emailuser (const char *source, const char *email, GError **error)
 {
     CcnetUserManager *user_mgr = 
         ((CcnetServerSession *)session)->user_mgr;
@@ -671,7 +671,7 @@ ccnet_rpc_remove_emailuser (const char *email, GError **error)
         return -1;
     }
 
-    ret = ccnet_user_manager_remove_emailuser (user_mgr, email);
+    ret = ccnet_user_manager_remove_emailuser (user_mgr, source, email);
 
     return ret;
 }
@@ -1202,7 +1202,7 @@ ccnet_rpc_remove_org (int org_id, GError **error)
                                                        0, INT_MAX);
     ptr = email_list;
     while (ptr) {
-        ccnet_user_manager_remove_emailuser (user_mgr, (gchar *)ptr->data);
+        ccnet_user_manager_remove_emailuser (user_mgr, "DB", (gchar *)ptr->data);
         ptr = ptr->next;
     }
     string_list_free (email_list);
