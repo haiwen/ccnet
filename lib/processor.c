@@ -157,9 +157,9 @@ void ccnet_processor_handle_update (CcnetProcessor *processor,
     processor->is_active = TRUE;
 
     if (code[0] == '5') {
-        ccnet_warning ("[Proc] Shutdown processor %s(%d) for bad update: %s %s\n",
-                       GET_PNAME(processor), PRINT_ID(processor->id),
-                       code, code_msg);
+        ccnet_debug ("[Proc] Shutdown processor %s(%d) for bad update: %s %s\n",
+                     GET_PNAME(processor), PRINT_ID(processor->id),
+                     code, code_msg);
 
         if (memcmp(code, SC_UNKNOWN_SERVICE, 3) == 0)
             processor->failure = PROC_NO_SERVICE;
@@ -178,13 +178,13 @@ void ccnet_processor_handle_update (CcnetProcessor *processor,
         ccnet_processor_send_response (processor, SC_PROC_ALIVE, 
                                        SS_PROC_ALIVE, NULL, 0);
     } else if (strncmp (code, SC_PROC_DEAD, 3) == 0) {
-        g_warning ("[proc] Shutdown processor %s(%d) when peer(%.8s) processor is dead\n",
+        ccnet_debug ("[proc] Shutdown processor %s(%d) when peer(%.8s) processor is dead\n",
                    GET_PNAME(processor), PRINT_ID(processor->id),
                    processor->peer_id);
         processor->failure = PROC_REMOTE_DEAD;
         ccnet_processor_done (processor, FALSE);
     } else if (strncmp (code, SC_PROC_DONE, 3) == 0) {
-        g_debug ("[proc] Shutdown processor when receive 103: service done\n");
+        ccnet_debug ("[proc] Shutdown processor when receive 103: service done\n");
         ccnet_processor_done (processor, TRUE);
     } else {
         CCNET_PROCESSOR_GET_CLASS (processor)->handle_update (processor, 
@@ -205,7 +205,7 @@ void ccnet_processor_handle_response (CcnetProcessor *processor,
     processor->is_active = TRUE;
 
     if (code[0] == '5') {
-        ccnet_warning ("[Proc] Shutdown processor %s(%d) for bad response: %s %s from %s\n",
+        ccnet_debug ("[Proc] Shutdown processor %s(%d) for bad response: %s %s from %s\n",
                        GET_PNAME(processor), PRINT_ID(processor->id),
                        code, code_msg, processor->peer_id);
         if (memcmp(code, SC_UNKNOWN_SERVICE, 3) == 0)
@@ -225,7 +225,7 @@ void ccnet_processor_handle_response (CcnetProcessor *processor,
         ccnet_processor_send_update (processor, SC_PROC_ALIVE, 
                                      SS_PROC_ALIVE, NULL, 0);
     } else if (strncmp (code, SC_PROC_DEAD, 3) == 0) {
-        g_warning ("[proc] Shutdown processor %s(%d) when peer(%.8s) processor is dead\n",
+        ccnet_debug ("[proc] Shutdown processor %s(%d) when peer(%.8s) processor is dead\n",
                    GET_PNAME(processor), PRINT_ID(processor->id),
                    processor->peer_id);
         processor->failure = PROC_REMOTE_DEAD;
