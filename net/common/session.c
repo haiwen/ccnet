@@ -135,10 +135,14 @@ ccnet_session_load_config (CcnetSession *session, const char *config_dir_r)
     lport_str = ccnet_key_file_get_string (key_file, "Client", "PORT");
     un_path = ccnet_key_file_get_string (key_file, "Client", "UNIX_SOCKET");
     
-    if (port_str == NULL)
-        port = DEFAULT_PORT;
-    else
+    if (port_str == NULL) {
+        port = 0;
+    } else {
         port = atoi (port_str);
+        if (port <= 0 || port > 65535) {
+            port = DEFAULT_PORT;
+        }
+    }
 
     if ( (id == NULL) || (strlen (id) != SESSION_ID_LENGTH) 
          || (hex_to_sha1 (id, sha1) < 0) ) {
@@ -513,6 +517,10 @@ ccnet_session_start (CcnetSession *session)
 {
     ccnet_proc_factory_start (session->proc_factory);
     ccnet_message_manager_start (session->msg_mgr);
+
+    if (session->base.public_port == 0) {
+        return;
+    }
 
     ccnet_session_start_network (session);
     if (session->base.net_status == NET_STATUS_DOWN) {
