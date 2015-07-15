@@ -220,11 +220,12 @@ make_configure_file (const char *config_file)
     fprintf (fp, "NAME = %s\n", peer_name);
     if (host_str)
         fprintf (fp, "SERVICE_URL = http://%s:8000\n", host_str);
-    
-    fprintf (fp, "\n");
-    fprintf (fp, "[Network]\n");
-    if (port_str)
+
+    if (port_str) {
+        fprintf (fp, "\n");
+        fprintf (fp, "[Network]\n");
         fprintf (fp, "PORT = %s\n", port_str);
+    }
 
     fprintf (fp, "\n");
     fprintf (fp, "[Client]\n");
