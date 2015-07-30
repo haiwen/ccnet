@@ -304,7 +304,8 @@ static int ldap_verify_user_password (CcnetUserManager *manager,
         res = ldap_search_s (ld, *base, LDAP_SCOPE_SUBTREE,
                              filter_str, attrs, 0, &msg);
         if (res != LDAP_SUCCESS) {
-            ccnet_warning ("ldap_search failed: %s.\n", ldap_err2string(res));
+            ccnet_warning ("ldap_search failed for base %s: %s.\n",
+                           *base, ldap_err2string(res));
             ret = -1;
             ldap_msgfree (msg);
             goto out;
