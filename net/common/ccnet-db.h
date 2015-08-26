@@ -105,6 +105,34 @@ ccnet_db_statement_get_int64 (CcnetDB *db, const char *sql, int n, ...);
 char *
 ccnet_db_statement_get_string (CcnetDB *db, const char *sql, int n, ...);
 
+typedef struct CcnetDBTrans CcnetDBTrans;
+
+CcnetDBTrans *
+ccnet_db_begin_transaction (CcnetDB *db);
+
+void
+ccnet_db_trans_close (CcnetDBTrans *trans);
+
+int
+ccnet_db_commit (CcnetDBTrans *trans);
+
+int
+ccnet_db_rollback (CcnetDBTrans *trans);
+
+int
+ccnet_db_trans_query (CcnetDBTrans *trans, const char *sql, int n, ...);
+
+gboolean
+ccnet_db_trans_check_for_existence (CcnetDBTrans *trans,
+                                    const char *sql,
+                                    gboolean *db_err,
+                                    int n, ...);
+
+int
+ccnet_db_trans_foreach_selected_row (CcnetDBTrans *trans, const char *sql,
+                                     CcnetDBRowFunc callback, void *data,
+                                     int n, ...);
+
 #else
 
 #define CcnetDB sqlite3
