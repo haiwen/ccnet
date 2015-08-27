@@ -231,6 +231,14 @@ static LDAP *ldap_init_and_bind (const char *host,
     return ld;
 }
 
+static gboolean
+get_uid_cb (CcnetDBRow *row, void *data)
+{
+    int *id = data;
+    *id = ccnet_db_row_get_column_int (row, 0);
+    return FALSE;
+}
+
 static int
 add_ldapuser (CcnetDB *db,
               const char *email,
@@ -240,28 +248,69 @@ add_ldapuser (CcnetDB *db,
               const char *extra_attrs)
 {
     int rc;
+    CcnetDBTrans *trans;
+    int uid = -1;
+
+    trans = ccnet_db_begin_transaction (db);
+    if (!trans)
+        return -1;
+
+    switch (ccnet_db_type (db)) {
+        case CCNET_DB_TYPE_MYSQL:
+        case CCNET_DB_TYPE_PGSQL:
+            rc = ccnet_db_trans_foreach_selected_row (trans,
+                                                      "SELECT id FROM LDAPUsers "
+                                                      "WHERE email = ? FOR UPDATE",
+                                                      get_uid_cb , &uid, 1, "string", email);
+            break;
+        case CCNET_DB_TYPE_SQLITE:
+            rc = ccnet_db_trans_foreach_selected_row (trans,
+                                                      "SELECT id FROM LDAPUsers WHERE email = ?",
+                                                      get_uid_cb , &uid, 1, "string", email);
+    }
+
+    if (rc < 0) {
+        ccnet_db_rollback (trans);
+        ccnet_db_trans_close (trans);
+        return -1;
+    }
+
+    if (rc == 1) {
+        ccnet_db_commit (trans);
+        ccnet_db_trans_close (trans);
+        return uid;
+    }
 
     if (extra_attrs)
-        rc = ccnet_db_statement_query (db,
-                                       "INSERT INTO LDAPUsers (email, password, is_staff, "
-                                       "is_active, extra_attrs) VALUES (?, ?, ?, ?, ?)",
-                                       5, "string", email, "string", password, "int",
-                                       is_staff, "int", is_active, "string", extra_attrs);
+        rc = ccnet_db_trans_query (trans,
+                                   "INSERT INTO LDAPUsers (email, password, is_staff, "
+                                   "is_active, extra_attrs) VALUES (?, ?, ?, ?, ?)",
+                                   5, "string", email, "string", password, "int",
+                                   is_staff, "int", is_active, "string", extra_attrs);
     else
-        rc = ccnet_db_statement_query (db,
-                                       "INSERT INTO LDAPUsers (email, password, is_staff, "
-                                       "is_active) VALUES (?, ?, ?, ?)", 4, "string", email,
-                                       "string", password, "int", is_staff, "int", is_active);
+        rc = ccnet_db_trans_query (trans,
+                                   "INSERT INTO LDAPUsers (email, password, is_staff, "
+                                   "is_active) VALUES (?, ?, ?, ?)", 4, "string", email,
+                                   "string", password, "int", is_staff, "int", is_active);
     if (rc < 0) {
+        ccnet_db_rollback (trans);
+        ccnet_db_trans_close (trans);
         return rc;
     }
 
-    rc = ccnet_db_statement_get_int (db,
-                                     "SELECT id FROM LDAPUsers WHERE email = ?",
-                                     1, "string", email);
+    if (ccnet_db_commit (trans) < 0) {
+        ccnet_db_rollback (trans);
+        ccnet_db_trans_close (trans);
+        return -1;
+    }
 
+    ccnet_db_trans_close (trans);
 
-    return rc;
+    ccnet_db_statement_foreach_row (db,
+                                    "SELECT id FROM LDAPUsers WHERE email = ?",
+                                    get_uid_cb, &uid, 1, "string", email);
+
+    return uid;
 }
 
 static int ldap_verify_user_password (CcnetUserManager *manager,
@@ -478,7 +527,7 @@ static int check_db_table (CcnetDB *db)
           "id INTEGER PRIMARY KEY AUTO_INCREMENT, "
           "email VARCHAR(255) NOT NULL, password varchar(255) NOT NULL, "
           "is_staff BOOL NOT NULL, is_active BOOL NOT NULL, extra_attrs TEXT, "
-          "INDEX(email)) ENGINE=INNODB";
+          "UNIQUE INDEX(email)) ENGINE=INNODB";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
 
@@ -525,7 +574,7 @@ static int check_db_table (CcnetDB *db)
         if (ccnet_db_query (db, sql) < 0)
             return -1;
 
-        sql = "CREATE INDEX IF NOT EXISTS ldapusers_email_index on LDAPUsers(email)";
+        sql = "CREATE UNIQUE INDEX IF NOT EXISTS ldapusers_email_index on LDAPUsers(email)";
         if (ccnet_db_query (db, sql) < 0)
             return -1;
 
@@ -561,7 +610,7 @@ static int check_db_table (CcnetDB *db)
             return -1;
 
         if (!pgsql_index_exists (db, "ldapusers_email_idx")) {
-            sql = "CREATE INDEX ldapusers_email_idx ON LDAPUsers (email)";
+            sql = "CREATE UNIQUE INDEX ldapusers_email_idx ON LDAPUsers (email)";
             if (ccnet_db_query (db, sql) < 0)
                 return -1;
         }
