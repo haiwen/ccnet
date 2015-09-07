@@ -172,6 +172,10 @@ ccnet_start_rpc(CcnetSession *session)
                                      "count_emailusers",
                                      searpc_signature_int64__string());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
+                                     ccnet_rpc_count_inactive_emailusers,
+                                     "count_inactive_emailusers",
+                                     searpc_signature_int64__string());
+    searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_update_emailuser,
                                      "update_emailuser",
                                      searpc_signature_int__string_int_string_int_int());
@@ -757,6 +761,15 @@ ccnet_rpc_count_emailusers (const char *source, GError **error)
         ((CcnetServerSession *)session)->user_mgr;
 
    return ccnet_user_manager_count_emailusers (user_mgr, source);
+}
+
+gint64
+ccnet_rpc_count_inactive_emailusers (const char *source, GError **error)
+{
+   CcnetUserManager *user_mgr =
+        ((CcnetServerSession *)session)->user_mgr;
+
+   return ccnet_user_manager_count_inactive_emailusers (user_mgr, source);
 }
 
 #if 0

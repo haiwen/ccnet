@@ -79,6 +79,7 @@ ccnet_user_manager_new (CcnetSession *session)
 
 #define DEFAULT_PASSWD_HASH_ITER 10000
 
+// return current active user number
 static int
 get_current_user_number (CcnetUserManager *manager)
 {
@@ -91,6 +92,7 @@ get_current_user_number (CcnetUserManager *manager)
     }
     total += count;
 
+#ifdef HAVE_LDAP
     if (manager->use_ldap) {
         count = ccnet_user_manager_count_emailusers (manager, "LDAP");
         if (count < 0) {
@@ -99,6 +101,7 @@ get_current_user_number (CcnetUserManager *manager)
         }
         total += count;
     }
+#endif
 
     return total;
 }
@@ -1384,6 +1387,33 @@ ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *sour
     return ret;
 }
 
+gint64
+ccnet_user_manager_count_inactive_emailusers (CcnetUserManager *manager, const char *source)
+{
+    CcnetDB* db = manager->priv->db;
+    char sql[512];
+    gint64 ret;
+
+#ifdef HAVE_LDAP
+    if (manager->use_ldap && g_strcmp0(source, "LDAP") == 0) {
+        gint64 ret = ccnet_db_get_int64 (db, "SELECT COUNT(id) FROM LDAPUsers WHERE is_active = 0");
+        if (ret < 0)
+            return -1;
+        return ret;
+    }
+#endif
+
+    if (g_strcmp0 (source, "DB") != 0)
+        return -1;
+
+    snprintf (sql, 512, "SELECT COUNT(id) FROM EmailUser WHERE is_active = 0");
+
+    ret = ccnet_db_get_int64 (db, sql);
+    if (ret < 0)
+        return -1;
+    return ret;
+}
+
 #if 0
 GList*
 ccnet_user_manager_filter_emailusers_by_emails(CcnetUserManager *manager,
@@ -1434,9 +1464,9 @@ ccnet_user_manager_update_emailuser (CcnetUserManager *manager,
     CcnetDB* db = manager->priv->db;
     char *db_passwd = NULL;
 
-    // in case set user user1 inactive, then add another active user user2,
+    // in case set user user1 to inactive, then add another active user user2,
     // if current user num already the max user num,
-    // then reset user1 active will sucess should be fail
+    // then reset user1 to active should fail
     if (is_active && !check_user_number (manager, FALSE)) {
         return -1;
     }
