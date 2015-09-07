@@ -50,9 +50,7 @@ static int try_load_ldap_settings (CcnetUserManager *manager);
 struct CcnetUserManagerPriv {
     CcnetDB    *db;
     int         max_users;
-    int         cur_users;
 };
-
 
 static void
 ccnet_user_manager_class_init (CcnetUserManagerClass *klass)
@@ -81,6 +79,52 @@ ccnet_user_manager_new (CcnetSession *session)
 
 #define DEFAULT_PASSWD_HASH_ITER 10000
 
+static int
+get_current_user_number (CcnetUserManager *manager)
+{
+    int total = 0, count;
+
+    count = ccnet_user_manager_count_emailusers (manager, "DB");
+    if (count < 0) {
+        ccnet_warning ("Failed to get user number from DB.\n");
+        return -1;
+    }
+    total += count;
+
+    if (manager->use_ldap) {
+        count = ccnet_user_manager_count_emailusers (manager, "LDAP");
+        if (count < 0) {
+            ccnet_warning ("Failed to get user number from LDAP.\n");
+            return -1;
+        }
+        total += count;
+    }
+
+    return total;
+}
+
+static gboolean
+check_user_number (CcnetUserManager *manager, gboolean allow_equal)
+{
+    if (manager->priv->max_users == 0) {
+        return TRUE;
+    }
+
+    int cur_num = get_current_user_number (manager);
+    if (cur_num < 0) {
+        return FALSE;
+    }
+
+    if ((allow_equal && cur_num > manager->priv->max_users) ||
+        (!allow_equal && cur_num >= manager->priv->max_users)) {
+        ccnet_warning ("The number of users exceeds limit, max %d, current %d\n",
+                       manager->priv->max_users, cur_num);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 int
 ccnet_user_manager_prepare (CcnetUserManager *manager)
 {
@@ -103,6 +147,10 @@ ccnet_user_manager_prepare (CcnetUserManager *manager)
     ret = open_db(manager);
     if (ret < 0)
         return ret;
+
+    if (!check_user_number (manager, TRUE)) {
+        return -1;
+    }
 
     return 0;
 }
@@ -784,10 +832,7 @@ ccnet_user_manager_add_emailuser (CcnetUserManager *manager,
     char *db_passwd = NULL;
     int ret;
 
-    if (manager->priv->max_users &&
-        manager->priv->cur_users >= manager->priv->max_users) {
-        ccnet_warning ("User number exceeds limit. Users %d, limit %d.\n",
-                       manager->priv->cur_users, manager->priv->max_users);
+    if (!check_user_number (manager, FALSE)) {
         return -1;
     }
 
@@ -816,7 +861,6 @@ ccnet_user_manager_add_emailuser (CcnetUserManager *manager,
     if (ret < 0)
         return ret;
 
-    manager->priv->cur_users ++;
     return 0;
 }
 
@@ -836,12 +880,7 @@ ccnet_user_manager_remove_emailuser (CcnetUserManager *manager,
         ret = ccnet_db_statement_query (db,
                                         "DELETE FROM EmailUser WHERE email=?",
                                         1, "string", email);
-        if (ret < 0) {
-            return ret;
-        } else {
-            manager->priv->cur_users --;
-            return 0;
-        }
+        return ret;
     }
 
 #ifdef HAVE_LDAP
@@ -849,12 +888,7 @@ ccnet_user_manager_remove_emailuser (CcnetUserManager *manager,
         ret = ccnet_db_statement_query (db,
                                         "DELETE FROM LDAPUsers WHERE email=?",
                                         1, "string", email);
-        if (ret < 0) {
-            return ret;
-        } else {
-            manager->priv->cur_users --;
-            return 0;
-        }
+        return ret;
     }
 #endif
 
@@ -1042,10 +1076,7 @@ ccnet_user_manager_get_emailuser (CcnetUserManager *manager,
                 g_object_unref (ptr->data);
             g_list_free (users);
 
-            if (manager->priv->max_users &&
-                manager->priv->cur_users >= manager->priv->max_users) {
-                ccnet_warning ("User number exceeds limit. Users %d, limit %d.\n",
-                               manager->priv->cur_users, manager->priv->max_users);
+            if (!check_user_number (manager, FALSE)) {
                 g_free (email_down);
                 g_object_unref (emailuser);
                 return NULL;
@@ -1062,8 +1093,6 @@ ccnet_user_manager_get_emailuser (CcnetUserManager *manager,
             }
 
             g_object_set (emailuser, "id", ret, NULL);
-
-            ++manager->priv->cur_users;
         }
 
         char *role = ccnet_user_manager_get_role_emailuser(manager, email_down);
@@ -1404,6 +1433,13 @@ ccnet_user_manager_update_emailuser (CcnetUserManager *manager,
 {
     CcnetDB* db = manager->priv->db;
     char *db_passwd = NULL;
+
+    // in case set user user1 inactive, then add another active user user2,
+    // if current user num already the max user num,
+    // then reset user1 active will sucess should be fail
+    if (is_active && !check_user_number (manager, FALSE)) {
+        return -1;
+    }
 
     if (strcmp (source, "DB") == 0) {
         if (g_strcmp0 (passwd, "!") == 0) {
