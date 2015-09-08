@@ -116,6 +116,9 @@ ccnet_rpc_search_emailusers (const char *source,
 gint64
 ccnet_rpc_count_emailusers (const char *source, GError **error);
 
+gint64
+ccnet_rpc_count_inactive_emailusers (const char *source, GError **error);
+
 /**
  * Select multiple users according to the given emails.
  *
