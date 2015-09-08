@@ -248,63 +248,34 @@ add_ldapuser (CcnetDB *db,
               const char *extra_attrs)
 {
     int rc;
-    CcnetDBTrans *trans;
     int uid = -1;
 
-    trans = ccnet_db_begin_transaction (db);
-    if (!trans)
-        return -1;
-
-    switch (ccnet_db_type (db)) {
-        case CCNET_DB_TYPE_MYSQL:
-        case CCNET_DB_TYPE_PGSQL:
-            rc = ccnet_db_trans_foreach_selected_row (trans,
-                                                      "SELECT id FROM LDAPUsers "
-                                                      "WHERE email = ? FOR UPDATE",
-                                                      get_uid_cb , &uid, 1, "string", email);
-            break;
-        case CCNET_DB_TYPE_SQLITE:
-            rc = ccnet_db_trans_foreach_selected_row (trans,
-                                                      "SELECT id FROM LDAPUsers WHERE email = ?",
-                                                      get_uid_cb , &uid, 1, "string", email);
-    }
+    rc = ccnet_db_statement_foreach_row (db,
+                                         "SELECT id FROM LDAPUsers WHERE email = ?",
+                                         get_uid_cb, &uid, 1, "string", email);
 
     if (rc < 0) {
-        ccnet_db_rollback (trans);
-        ccnet_db_trans_close (trans);
-        return -1;
+        return rc;
     }
 
     if (rc == 1) {
-        ccnet_db_commit (trans);
-        ccnet_db_trans_close (trans);
         return uid;
     }
 
     if (extra_attrs)
-        rc = ccnet_db_trans_query (trans,
-                                   "INSERT INTO LDAPUsers (email, password, is_staff, "
-                                   "is_active, extra_attrs) VALUES (?, ?, ?, ?, ?)",
-                                   5, "string", email, "string", password, "int",
-                                   is_staff, "int", is_active, "string", extra_attrs);
+        rc = ccnet_db_statement_query (db,
+                                       "INSERT INTO LDAPUsers (email, password, is_staff, "
+                                       "is_active, extra_attrs) VALUES (?, ?, ?, ?, ?)",
+                                       5, "string", email, "string", password, "int",
+                                       is_staff, "int", is_active, "string", extra_attrs);
     else
-        rc = ccnet_db_trans_query (trans,
-                                   "INSERT INTO LDAPUsers (email, password, is_staff, "
-                                   "is_active) VALUES (?, ?, ?, ?)", 4, "string", email,
-                                   "string", password, "int", is_staff, "int", is_active);
+        rc = ccnet_db_statement_query (db,
+                                       "INSERT INTO LDAPUsers (email, password, is_staff, "
+                                       "is_active) VALUES (?, ?, ?, ?)", 4, "string", email,
+                                       "string", password, "int", is_staff, "int", is_active);
     if (rc < 0) {
-        ccnet_db_rollback (trans);
-        ccnet_db_trans_close (trans);
         return rc;
     }
-
-    if (ccnet_db_commit (trans) < 0) {
-        ccnet_db_rollback (trans);
-        ccnet_db_trans_close (trans);
-        return -1;
-    }
-
-    ccnet_db_trans_close (trans);
 
     ccnet_db_statement_foreach_row (db,
                                     "SELECT id FROM LDAPUsers WHERE email = ?",
