@@ -3,8 +3,8 @@
 set -e -x
 
 PREFIX=$HOME/opt/local
-export CPPFLAGS="$CPPFLAGS $PREFIX/include"
-export LDFLAGS="$CPPFLAGS $PREFIX/lib $PREFIX/lib64"
+export CPPFLAGS="$CPPFLAGS -I$PREFIX/include"
+export LDFLAGS="$LDFLAGS -L$PREFIX/lib -L$PREFIX/lib64"
 export PATH="$PREFIX/bin:$PATH"
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PREFIX/lib64/pkgconfig:$PKG_CONFIG_PATH"
 
