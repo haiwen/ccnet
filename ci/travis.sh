@@ -31,6 +31,7 @@ install_deps() {
 
 install_deps
 
+./autogen.sh
 ./configure --prefix=$PREFIX --enable-server --enable-client
 make -j2
 make check
