@@ -92,10 +92,12 @@ ccnet_session_new ()
 }
 
 int
-ccnet_session_load_config (CcnetSession *session, const char *config_dir_r)
+ccnet_session_load_config (CcnetSession *session,
+                           const char *server_config_dir_r,
+                           const char *config_dir_r)
 {
     int ret = 0;
-    char *config_file, *config_dir;
+    char *config_file = NULL, *config_dir = NULL, *server_config_dir = NULL;
     char *id = NULL, *name = NULL, *port_str = NULL,
         *lport_str = NULL, *un_path = NULL,
         *user_name = NULL;
@@ -114,7 +116,19 @@ ccnet_session_load_config (CcnetSession *session, const char *config_dir_r)
         return -1;
     }
 
-    config_file = g_build_filename (config_dir, SESSION_CONFIG_FILENAME, NULL);
+#ifdef CCNET_SERVER
+    if (server_config_dir_r) {
+        server_config_dir = ccnet_expand_path (server_config_dir_r);
+        if (checkdir(server_config_dir) < 0) {
+            ccnet_error ("Server Config dir %s does not exist or is not "
+                         "a directory.\n", server_config_dir);
+            return -1;
+        }
+    }
+#endif
+
+    config_file = g_build_filename (server_config_dir ? server_config_dir : config_dir,
+                                    SESSION_CONFIG_FILENAME, NULL);
     key_file = g_key_file_new ();
     g_key_file_set_list_separator (key_file, ',');
     if (!g_key_file_load_from_file (key_file, config_file,
@@ -164,6 +178,7 @@ ccnet_session_load_config (CcnetSession *session, const char *config_dir_r)
 #endif
     session->config_file = config_file;
     session->config_dir = config_dir;
+    session->server_config_dir = server_config_dir;
     session->un_path = un_path;
     session->local_port = local_port;
     session->keyf = key_file;
@@ -194,12 +209,15 @@ ccnet_session_free (CcnetSession *session)
 
 
 int
-ccnet_session_prepare (CcnetSession *session, const char *config_dir_r, gboolean test_config)
+ccnet_session_prepare (CcnetSession *session,
+                       const char *server_config_dir,
+                       const char *config_dir_r,
+                       gboolean test_config)
 {
     char *misc_path;
     int ret;
 
-    if (ccnet_session_load_config (session, config_dir_r) < 0)
+    if (ccnet_session_load_config (session, server_config_dir, config_dir_r) < 0)
         return -1;
 
     misc_path = g_build_filename (session->config_dir, "misc", NULL);
