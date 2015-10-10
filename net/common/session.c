@@ -129,6 +129,7 @@ ccnet_session_load_config (CcnetSession *session,
 
     config_file = g_build_filename (server_config_dir ? server_config_dir : config_dir,
                                     SESSION_CONFIG_FILENAME, NULL);
+    ccnet_message ("using config file %s\n", config_file);
     key_file = g_key_file_new ();
     g_key_file_set_list_separator (key_file, ',');
     if (!g_key_file_load_from_file (key_file, config_file,
