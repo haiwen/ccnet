@@ -87,3 +87,4 @@ libccnet.pc
 demo/ccnet-demo-client
 demo/ccnet-demo-server
 net/daemon/ccnet-test
+/compile
