@@ -36,7 +36,7 @@ void ccnet_register_service (CcnetClient *client,
 gboolean ccnet_register_service_sync (CcnetClient *client,
                                       const char *service,
                                       const char *group);
-CcnetClient *ccnet_init (const char *confdir);
+CcnetClient *ccnet_init (const char *server_config_dir, const char *confdir);
 
 void ccnet_send_command (CcnetClient *client, const char *command,
                          SendcmdProcRcvrspCallback cmd_cb, void *cbdata);
@@ -52,7 +52,7 @@ struct CcnetClientPool;
 typedef struct CcnetClientPool CcnetClientPool;
 
 struct CcnetClientPool *
-ccnet_client_pool_new (const char *conf_dir);
+ccnet_client_pool_new (const char *server_config_dir, const char *conf_dir);
 
 CcnetClient *
 ccnet_client_pool_get_client (struct CcnetClientPool *cpool);

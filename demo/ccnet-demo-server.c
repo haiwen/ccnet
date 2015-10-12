@@ -56,11 +56,11 @@ main(int argc, char *argv[])
     g_type_init();
 #endif
 
-    client = ccnet_init(config_dir);
+    client = ccnet_init(NULL, config_dir);
     if (!client)
         exit(1);
 
-    if ((ccnet_client_load_confdir(client, config_dir)) < 0) {
+    if ((ccnet_client_load_confdir(client, NULL, config_dir)) < 0) {
         fprintf (stderr, "Read config dir error\n");
         exit(1);
     }

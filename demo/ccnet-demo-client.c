@@ -71,7 +71,7 @@ main(int argc, char *argv[])
     client = ccnet_client_new();
     if (!client)
         exit(1);
-    if ((ccnet_client_load_confdir(client, config_dir)) < 0) {
+    if ((ccnet_client_load_confdir(client, NULL, config_dir)) < 0) {
         fprintf(stderr, "Read config dir error\n");
         exit(1);
     }

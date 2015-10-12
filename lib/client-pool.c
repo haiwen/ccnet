@@ -9,17 +9,19 @@
 struct CcnetClientPool {
     GQueue *clients;
     pthread_mutex_t lock;
+    const char *server_config_dir;
     const char *conf_dir;
 };
 
 struct CcnetClientPool *
-ccnet_client_pool_new (const char *conf_dir)
+ccnet_client_pool_new (const char *server_config_dir, const char *conf_dir)
 {
     CcnetClientPool *pool = g_new0 (CcnetClientPool, 1);
 
     pool->clients = g_queue_new ();
     pthread_mutex_init (&pool->lock, NULL);
     pool->conf_dir = g_strdup(conf_dir);
+    pool->server_config_dir = g_strdup(server_config_dir);
 
     return pool;
 }
@@ -35,7 +37,7 @@ ccnet_client_pool_get_client (struct CcnetClientPool *cpool)
 
     if (!client) {
         client = ccnet_client_new ();
-        if (ccnet_client_load_confdir (client, cpool->conf_dir) < 0) {
+        if (ccnet_client_load_confdir (client, cpool->server_config_dir, cpool->conf_dir) < 0) {
             g_warning ("[client pool] Failed to load conf dir.\n");
             g_object_unref (client);
             return NULL;
