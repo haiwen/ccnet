@@ -36,7 +36,7 @@ def register_rpc_functions(session):
 def main():
     init_logging()
     evbase = libevent.Base()
-    session = AsyncClient(CCNET_CONF_DIR, evbase)
+    session = AsyncClient(CCNET_CONF_DIR, evbase, CCNET_CONF_DIR)
     session.connect_daemon()
     register_rpc_functions(session)
     session.main_loop()
