@@ -160,7 +160,7 @@ ccnet_client_load_confdir (CcnetClient *client, const char *central_config_dir_r
     config_file =
         g_strconcat(central_config_dir ? central_config_dir : config_dir, "/",
                     SESSION_CONFIG_FILENAME, NULL);
-    ccnet_message ("using config file %s\n", config_file);
+    ccnet_debug ("using config file %s\n", config_file);
     key_file = g_key_file_new();
     if (!g_key_file_load_from_file (key_file, config_file,
                                     G_KEY_FILE_KEEP_COMMENTS, NULL))
