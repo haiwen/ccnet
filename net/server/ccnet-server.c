@@ -103,7 +103,7 @@ static struct option long_options[] = {
     { "help", no_argument, NULL, 'h', }, 
     { "version", no_argument, NULL, 'v', }, 
     { "config-dir", required_argument, NULL, 'c' },
-    { "server-conf-dir", required_argument, NULL, 'F' },
+    { "central-config-dir", required_argument, NULL, 'F' },
     { "logfile", required_argument, NULL, 'f' },
     { "debug", required_argument, NULL, 'D' },
     { "daemon", no_argument, NULL, 'd' },
@@ -141,15 +141,15 @@ static void usage()
         stdout);
 }
 
-int test_ccnet_config(const char *server_config_dir, const char *config_dir, int max_users)
+int test_ccnet_config(const char *central_config_dir, const char *config_dir, int max_users)
 {
 #if !GLIB_CHECK_VERSION(2, 36, 0)
     g_type_init ();
 #endif
 
     config_dir = ccnet_expand_path (config_dir);
-    if (server_config_dir) {
-        server_config_dir = ccnet_expand_path (server_config_dir);
+    if (central_config_dir) {
+        central_config_dir = ccnet_expand_path (central_config_dir);
     }
 
     if (ccnet_log_init ("-", "debug") < 0) {
@@ -168,7 +168,7 @@ int test_ccnet_config(const char *server_config_dir, const char *config_dir, int
     event_init ();
     evdns_init ();
     ccnet_user_manager_set_max_users (((struct CcnetServerSession *)session)->user_mgr, max_users);
-    if (ccnet_session_prepare(session, server_config_dir, config_dir, TRUE) < 0) {
+    if (ccnet_session_prepare(session, central_config_dir, config_dir, TRUE) < 0) {
         return -1;
     }
 
@@ -180,7 +180,7 @@ main (int argc, char **argv)
 {
     int c;
     char *config_dir;
-    char *server_config_dir = NULL;
+    char *central_config_dir = NULL;
     char *log_file = 0;
     const char *debug_str = 0;
     int daemon_mode = 0;
@@ -207,7 +207,7 @@ main (int argc, char **argv)
             config_dir = optarg;
             break;
         case 'F':
-            server_config_dir = optarg;
+            central_config_dir = optarg;
             break;
         case 'f':
             log_file = optarg;
@@ -245,7 +245,7 @@ main (int argc, char **argv)
 
     if (test_config) {
         /* test ccnet configuration and exit */
-        return test_ccnet_config (server_config_dir, config_dir, max_users);
+        return test_ccnet_config (central_config_dir, config_dir, max_users);
     }
 
 #ifndef WIN32
@@ -310,7 +310,7 @@ main (int argc, char **argv)
     event_init ();
     evdns_init ();
     ccnet_user_manager_set_max_users (((struct CcnetServerSession *)session)->user_mgr, max_users);
-    if (ccnet_session_prepare(session, server_config_dir, config_dir, FALSE) < 0) {
+    if (ccnet_session_prepare(session, central_config_dir, config_dir, FALSE) < 0) {
         fputs ("Error: failed to start ccnet session, "
                "see log file for the detail.\n", stderr);
         return -1;

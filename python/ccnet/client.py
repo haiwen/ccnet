@@ -48,22 +48,22 @@ def parse_update(body):
 
 class Client(object):
     '''Base ccnet client class'''
-    def __init__(self, config_dir, server_config_dir=None):
+    def __init__(self, config_dir, central_config_dir=None):
         if not isinstance(config_dir, unicode):
             config_dir = config_dir.decode('UTF-8')
 
-        if server_config_dir:
-            server_config_dir = os.path.expanduser(server_config_dir)
-            if not os.path.exists(server_config_dir):
-                raise RuntimeError(u'%s does not exits' % server_config_dir)
+        if central_config_dir:
+            central_config_dir = os.path.expanduser(central_config_dir)
+            if not os.path.exists(central_config_dir):
+                raise RuntimeError(u'%s does not exits' % central_config_dir)
         config_dir = os.path.expanduser(config_dir)
-        config_file = os.path.join(server_config_dir if server_config_dir else config_dir,
+        config_file = os.path.join(central_config_dir if central_config_dir else config_dir,
                                    u'ccnet.conf')
         logging.info('using config file %s', config_file)
         if not os.path.exists(config_file):
             raise RuntimeError(u'%s does not exits' % config_file)
 
-        self.server_config_dir = server_config_dir
+        self.central_config_dir = central_config_dir
         self.config_dir = config_dir
         self.config_file = config_file
         self.config = None

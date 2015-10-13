@@ -131,9 +131,9 @@ ccnet_client_free (GObject *object)
 }
 
 int
-ccnet_client_load_confdir (CcnetClient *client, const char *server_config_dir_r, const char *config_dir_r)
+ccnet_client_load_confdir (CcnetClient *client, const char *central_config_dir_r, const char *config_dir_r)
 {
-    char *config_file = NULL, *config_dir = NULL, *server_config_dir = NULL;
+    char *config_file = NULL, *config_dir = NULL, *central_config_dir = NULL;
     char *id = NULL, *name = NULL, *port_str = NULL, *un_path = NULL,
         *user_name = NULL, *service_url = NULL;
     unsigned char sha1[20];
@@ -148,17 +148,17 @@ ccnet_client_load_confdir (CcnetClient *client, const char *server_config_dir_r,
         return -1;
     }
 
-    if (server_config_dir_r) {
-        server_config_dir = ccnet_util_expand_path (server_config_dir_r);
+    if (central_config_dir_r) {
+        central_config_dir = ccnet_util_expand_path (central_config_dir_r);
         if (ccnet_util_checkdir(config_dir) < 0) {
             g_warning ("Server config dir %s does not exist or is not "
-                       "a directory.\n", server_config_dir);
+                       "a directory.\n", central_config_dir);
             return -1;
         }
     }
 
     config_file =
-        g_strconcat(server_config_dir ? server_config_dir : config_dir, "/",
+        g_strconcat(central_config_dir ? central_config_dir : config_dir, "/",
                     SESSION_CONFIG_FILENAME, NULL);
     ccnet_message ("using config file %s\n", config_file);
     key_file = g_key_file_new();
@@ -195,7 +195,7 @@ ccnet_client_load_confdir (CcnetClient *client, const char *server_config_dir_r,
 
     client->config_file = g_strdup(config_file);
     client->config_dir = config_dir;
-    client->server_config_dir = server_config_dir;
+    client->central_config_dir = central_config_dir;
 
     if (port_str)
         client->daemon_port = atoi (port_str);
