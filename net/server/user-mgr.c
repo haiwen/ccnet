@@ -273,7 +273,8 @@ static LDAP *ldap_init_and_bind (const char *host,
         g_free (password_copy);
 #endif
         if (res != LDAP_SUCCESS ) {
-            ccnet_warning ("ldap_bind failed: %s.\n", ldap_err2string(res));
+            ccnet_warning ("ldap_bind failed for user %s: %s.\n",
+                           user_dn, ldap_err2string(res));
             ldap_unbind_s (ld);
             return NULL;
         }
@@ -356,8 +357,10 @@ static int ldap_verify_user_password (CcnetUserManager *manager,
 #endif
                              manager->user_dn,
                              manager->password);
-    if (!ld)
+    if (!ld) {
+        ccnet_warning ("Please check USER_DN and PASSWORD settings.\n");
         return -1;
+    }
 
     filter = g_string_new (NULL);
     if (!manager->filter)
@@ -375,8 +378,9 @@ static int ldap_verify_user_password (CcnetUserManager *manager,
         res = ldap_search_s (ld, *base, LDAP_SCOPE_SUBTREE,
                              filter_str, attrs, 0, &msg);
         if (res != LDAP_SUCCESS) {
-            ccnet_warning ("ldap_search failed for base %s: %s.\n",
-                           *base, ldap_err2string(res));
+            ccnet_warning ("ldap_search user '%s=%s' failed for base %s: %s.\n",
+                           manager->login_attr, uid, *base, ldap_err2string(res));
+            ccnet_warning ("Please check BASE setting in ccnet.conf.\n");
             ret = -1;
             ldap_msgfree (msg);
             goto out;
@@ -439,8 +443,10 @@ static GList *ldap_list_users (CcnetUserManager *manager, const char *uid,
 #endif
                              manager->user_dn,
                              manager->password);
-    if (!ld)
+    if (!ld) {
+        ccnet_warning ("Please check USER_DN and PASSWORD settings.\n");
         return NULL;
+    }
 
     filter = g_string_new (NULL);
     if (!manager->filter)
@@ -462,8 +468,9 @@ static GList *ldap_list_users (CcnetUserManager *manager, const char *uid,
         res = ldap_search_s (ld, *base, LDAP_SCOPE_SUBTREE,
                              filter_str, attrs, 0, &msg);
         if (res != LDAP_SUCCESS) {
-            ccnet_warning ("ldap_search failed for base %s: %s.\n",
-                           *base, ldap_err2string(res));
+            ccnet_warning ("ldap_search user '%s=%s' failed for base %s: %s.\n",
+                           manager->login_attr, uid, *base, ldap_err2string(res));
+            ccnet_warning ("Please check BASE setting in ccnet.conf.\n");
             ret = NULL;
             ldap_msgfree (msg);
             goto out;
