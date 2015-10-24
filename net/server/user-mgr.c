@@ -1221,9 +1221,12 @@ get_ldap_emailusers_cb (CcnetDBRow *row, void *data)
 GList*
 ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
                                    const char *source,
-                                   int start, int limit)
+                                   int start, int limit,
+                                   const char *status)
 {
     CcnetDB *db = manager->priv->db;
+    const char *status_condition = "";
+    char *sql = NULL;
     GList *ret = NULL;
     int rc;
 
@@ -1236,21 +1239,39 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
             return g_list_reverse (users);
         } else if (g_strcmp0 (source, "LDAPImport") == 0) {
             if (start == -1 && limit == -1) {
+                if (g_strcmp0(status, "active") == 0)
+                    status_condition = "WHERE t1.is_active = 1";
+                else if (g_strcmp0(status, "inactive") == 0)
+                    status_condition = "WHERE t1.is_active = 0";
+
+                sql = g_strdup_printf ("SELECT t1.id, t1.email, t1.is_staff, "
+                                       "t1.is_active, t2.role "
+                                       "FROM LDAPUsers t1 LEFT JOIN UserRole t2 "
+                                       "ON t1.email = t2.email %s",
+                                       status_condition);
+
                 rc = ccnet_db_statement_foreach_row (db,
-                                                     "SELECT t1.id, t1.email, t1.is_staff, "
-                                                     "t1.is_active, t2.role "
-                                                     "FROM LDAPUsers t1 LEFT JOIN UserRole t2 "
-                                                     "ON t1.email = t2.email",
+                                                     sql,
                                                      get_ldap_emailusers_cb,
                                                      &users, 0);
+                g_free (sql);
             } else {
+                if (g_strcmp0(status, "active") == 0)
+                    status_condition = "WHERE t1.is_active = 1";
+                else if (g_strcmp0(status, "inactive") == 0)
+                    status_condition = "WHERE t1.is_active = 0";
+
+                sql = g_strdup_printf ("SELECT t1.id, t1.email, t1.is_staff, "
+                                       "t1.is_active, t2.role "
+                                       "FROM LDAPUsers t1 LEFT JOIN UserRole t2 "
+                                       "ON t1.email = t2.email %s LIMIT ?, ?",
+                                       status_condition);
+
                 rc = ccnet_db_statement_foreach_row (db,
-                                                     "SELECT t1.id, t1.email, t1.is_staff, "
-                                                     "t1.is_active, t2.role "
-                                                     "FROM LDAPUsers t1 LEFT JOIN UserRole t2 "
-                                                     "ON t1.email = t2.email LIMIT ?, ?",
+                                                     sql,
                                                      get_ldap_emailusers_cb,
                                                      &users, 2, "int", start, "int", limit);
+                g_free (sql);
             }
 
             if (rc < 0) {
@@ -1268,25 +1289,44 @@ ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
     if (g_strcmp0 (source, "DB") != 0)
         return NULL;
 
-    if (start == -1 && limit == -1)
+    if (start == -1 && limit == -1) {
+        if (g_strcmp0(status, "active") == 0)
+            status_condition = "WHERE t1.is_active = 1";
+        else if (g_strcmp0(status, "inactive") == 0)
+            status_condition = "WHERE t1.is_active = 0";
+
+        sql = g_strdup_printf ("SELECT t1.id, t1.email, "
+                               "t1.is_staff, t1.is_active, t1.ctime, "
+                               "t2.role, t1.passwd FROM EmailUser AS t1 "
+                               "LEFT JOIN UserRole AS t2 "
+                               "ON t1.email = t2.email %s",
+                               status_condition);
+
         rc = ccnet_db_statement_foreach_row (db,
-                                             "SELECT t1.id, t1.email, "
-                                             "t1.is_staff, t1.is_active, t1.ctime, "
-                                             "t2.role, t1.passwd FROM EmailUser AS t1 "
-                                             "LEFT JOIN UserRole AS t2 "
-                                             "ON t1.email = t2.email ",
+                                             sql,
                                              get_emailusers_cb, &ret,
                                              0);
-    else
+        g_free (sql);
+    } else {
+        if (g_strcmp0(status, "active") == 0)
+            status_condition = "WHERE t1.is_active = 1";
+        else if (g_strcmp0(status, "inactive") == 0)
+            status_condition = "WHERE t1.is_active = 0";
+
+        sql = g_strdup_printf ("SELECT t1.id, t1.email, "
+                               "t1.is_staff, t1.is_active, t1.ctime, "
+                               "t2.role, t1.passwd FROM EmailUser AS t1 "
+                               "LEFT JOIN UserRole AS t2 "
+                               "ON t1.email = t2.email %s "
+                               "ORDER BY t1.id LIMIT ? OFFSET ?",
+                               status_condition);
+
         rc = ccnet_db_statement_foreach_row (db,
-                                             "SELECT t1.id, t1.email, "
-                                             "t1.is_staff, t1.is_active, t1.ctime, "
-                                             "t2.role, t1.passwd FROM EmailUser AS t1 "
-                                             "LEFT JOIN UserRole AS t2 "
-                                             "ON t1.email = t2.email "
-                                             "ORDER BY t1.id LIMIT ? OFFSET ?",
+                                             sql,
                                              get_emailusers_cb, &ret,
                                              2, "int", limit, "int", start);
+        g_free (sql);
+    }
 
     if (rc < 0) {
         while (ret != NULL) {

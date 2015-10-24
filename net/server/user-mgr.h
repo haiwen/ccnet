@@ -89,10 +89,13 @@ ccnet_user_manager_get_emailuser_by_id (CcnetUserManager *manager, int id);
 
 /*
  * @source: "DB" or "LDAP".
+ * @status: "", "active", or "inactive". returns all users when this argument is "".
  */
 GList*
-ccnet_user_manager_get_emailusers (CcnetUserManager *manager, const char *source,
-                                   int start, int limit);
+ccnet_user_manager_get_emailusers (CcnetUserManager *manager,
+                                   const char *source,
+                                   int start, int limit,
+                                   const char *status);
 
 GList*
 ccnet_user_manager_search_emailusers (CcnetUserManager *manager,

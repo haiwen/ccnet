@@ -162,7 +162,7 @@ ccnet_start_rpc(CcnetSession *session)
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_get_emailusers,
                                      "get_emailusers",
-                                     searpc_signature_objlist__string_int_int());
+                                     searpc_signature_objlist__string_int_int_string());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_search_emailusers,
                                      "search_emailusers",
@@ -725,13 +725,16 @@ ccnet_rpc_get_emailuser_by_id (int id, GError **error)
 }
 
 GList*
-ccnet_rpc_get_emailusers (const char *source, int start, int limit, GError **error)
+ccnet_rpc_get_emailusers (const char *source,
+                          int start, int limit,
+                          const char *status,
+                          GError **error)
 {
    CcnetUserManager *user_mgr = 
         ((CcnetServerSession *)session)->user_mgr;
     GList *emailusers = NULL;
 
-    emailusers = ccnet_user_manager_get_emailusers (user_mgr, source, start, limit);
+    emailusers = ccnet_user_manager_get_emailusers (user_mgr, source, start, limit, status);
     
     return emailusers;
 }
