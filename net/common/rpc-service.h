@@ -101,6 +101,9 @@ GObject*
 ccnet_rpc_get_emailuser (const char *email, GError **error);
 
 GObject*
+ccnet_rpc_get_emailuser_with_import (const char *email, GError **error);
+
+GObject*
 ccnet_rpc_get_emailuser_by_id (int id, GError **error);
 
 GList*
