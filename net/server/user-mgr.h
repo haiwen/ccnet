@@ -85,6 +85,9 @@ CcnetEmailUser*
 ccnet_user_manager_get_emailuser (CcnetUserManager *manager, const char *email);
 
 CcnetEmailUser*
+ccnet_user_manager_get_emailuser_with_import (CcnetUserManager *manager,
+                                              const char *email);
+CcnetEmailUser*
 ccnet_user_manager_get_emailuser_by_id (CcnetUserManager *manager, int id);
 
 /*

@@ -191,6 +191,10 @@ class CcnetThreadedRpcClient(RpcClientBase):
     def get_emailuser(self, email):
         pass
 
+    @searpc_func("object", ["string"])
+    def get_emailuser_with_import(self, email):
+        pass
+
     @searpc_func("object", ["int"])
     def get_emailuser_by_id(self, user_id):
         pass

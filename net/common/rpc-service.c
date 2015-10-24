@@ -156,6 +156,10 @@ ccnet_start_rpc(CcnetSession *session)
                                      "get_emailuser",
                                      searpc_signature_object__string());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
+                                     ccnet_rpc_get_emailuser_with_import,
+                                     "get_emailuser_with_import",
+                                     searpc_signature_object__string());
+    searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_get_emailuser_by_id,
                                      "get_emailuser_by_id",
                                      searpc_signature_object__int());
@@ -710,6 +714,17 @@ ccnet_rpc_get_emailuser (const char *email, GError **error)
     emailuser = ccnet_user_manager_get_emailuser (user_mgr, email);
     
     return (GObject *)emailuser;
+}
+
+GObject*
+ccnet_rpc_get_emailuser_with_import (const char *email, GError **error)
+{
+   CcnetUserManager *user_mgr = ((CcnetServerSession *)session)->user_mgr;
+   CcnetEmailUser *emailuser = NULL;
+
+   emailuser = ccnet_user_manager_get_emailuser_with_import (user_mgr, email);
+
+   return (GObject *)emailuser;
 }
 
 GObject*

@@ -1045,9 +1045,10 @@ get_ldap_emailuser_cb (CcnetDBRow *row, void *data)
     return FALSE;
 }
 
-CcnetEmailUser*
-ccnet_user_manager_get_emailuser (CcnetUserManager *manager,
-                                  const char *email)
+static CcnetEmailUser*
+get_emailuser (CcnetUserManager *manager,
+               const char *email,
+               gboolean import)
 {
     CcnetDB *db = manager->priv->db;
     char *sql;
@@ -1106,23 +1107,25 @@ ccnet_user_manager_get_emailuser (CcnetUserManager *manager,
                 g_object_unref (ptr->data);
             g_list_free (users);
 
-            if (!check_user_number (manager, FALSE)) {
-                g_free (email_down);
-                g_object_unref (emailuser);
-                return NULL;
-            }
+            if (import) {
+                if (!check_user_number (manager, FALSE)) {
+                    g_free (email_down);
+                    g_object_unref (emailuser);
+                    return NULL;
+                }
 
-            // add user to LDAPUsers
-            ret = add_ldapuser (manager->priv->db, email_down, "",
-                                FALSE, TRUE, NULL);
-            if (ret < 0) {
-                ccnet_warning ("add ldapuser to db failed.\n");
-                g_free (email_down);
-                g_object_unref (emailuser);
-                return NULL;
-            }
+                // add user to LDAPUsers
+                ret = add_ldapuser (manager->priv->db, email_down, "",
+                                    FALSE, TRUE, NULL);
+                if (ret < 0) {
+                    ccnet_warning ("add ldapuser to db failed.\n");
+                    g_free (email_down);
+                    g_object_unref (emailuser);
+                    return NULL;
+                }
 
-            g_object_set (emailuser, "id", ret, NULL);
+                g_object_set (emailuser, "id", ret, NULL);
+            }
         }
 
         char *role = ccnet_user_manager_get_role_emailuser(manager, email_down);
@@ -1138,6 +1141,21 @@ ccnet_user_manager_get_emailuser (CcnetUserManager *manager,
     g_free (email_down);
 
     return NULL;
+
+}
+
+CcnetEmailUser*
+ccnet_user_manager_get_emailuser (CcnetUserManager *manager,
+                                  const char *email)
+{
+    return get_emailuser (manager, email, FALSE);
+}
+
+CcnetEmailUser*
+ccnet_user_manager_get_emailuser_with_import (CcnetUserManager *manager,
+                                              const char *email)
+{
+    return get_emailuser (manager, email, TRUE);
 }
 
 CcnetEmailUser*
