@@ -54,6 +54,9 @@ struct CcnetSession
 
     struct _CcnetPeer          *myself;
 
+    /* path to the central config dir for ccnet/seafile/seahub/seafdav etc.   */
+    const char                 *central_config_dir;
+    /* path to ccnet specific config dir */
     const char                 *config_dir;
     const char                 *config_file;
     GKeyFile                   *keyf;
@@ -110,7 +113,10 @@ void ccnet_session_start (CcnetSession *session);
 void ccnet_session_on_exit (CcnetSession *session);
 void ccnet_session_save (CcnetSession *session);
 
-int ccnet_session_prepare (CcnetSession *session, const char *config_dir_r, gboolean test_config);
+int ccnet_session_prepare (CcnetSession *session,
+                           const char *central_config_dir_r, 
+                           const char *config_dir_r,
+                           gboolean test_config);
 
 void ccnet_session_save_config (CcnetSession *session);
 

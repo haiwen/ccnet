@@ -150,7 +150,7 @@ main (int argc, char **argv)
 
     event_init ();
     evdns_init ();
-    if (ccnet_session_prepare(session, config_dir, TRUE) < 0) {
+    if (ccnet_session_prepare(session, NULL, config_dir, TRUE) < 0) {
         fprintf (stderr, "session prepare error\n");
         return -1;
     }

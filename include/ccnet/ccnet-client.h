@@ -85,6 +85,7 @@ struct _CcnetClient
 
     int                         mode;
 
+    char                        *central_config_dir;
     char                        *config_dir;
     char                        *config_file;
 
@@ -121,7 +122,7 @@ struct _CcnetClientClass
 GType ccnet_client_get_type (void);
 
 CcnetClient* ccnet_client_new (void);
-int ccnet_client_load_confdir (CcnetClient *client, const char *confdir);
+int ccnet_client_load_confdir (CcnetClient *client, const char *central_config_dir, const char *confdir);
 
 /*
 void ccnet_client_add_alias (CcnetClient *client, const char *alias_str);

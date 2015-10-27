@@ -70,10 +70,11 @@ create_peerkey ()
 }
 
 
-static const char *short_opts = "hc:n:H:P:";
+static const char *short_opts = "hc:n:H:P:F:";
 static const struct option long_opts[] = {
     { "help", no_argument, NULL, 'h' },
     { "config-dir", required_argument, NULL, 'c' },
+    { "central-config-dir", required_argument, NULL, 'F' },
     { "name", required_argument, NULL, 'n' },
     { "host", required_argument, NULL, 'H' },
     { "port", required_argument, NULL, 'P' },
@@ -124,6 +125,7 @@ int
 main(int argc, char **argv)
 {
     char *config_dir;
+    char *central_config_dir = NULL;
     char *config_file;
     int c;
     char *name = NULL;
@@ -137,6 +139,9 @@ main(int argc, char **argv)
         switch (c) {
         case 'h':
             usage (1);
+            break;
+        case 'F':
+            central_config_dir = strdup(optarg);
             break;
         case 'c':
             config_dir = strdup(optarg);
@@ -176,7 +181,7 @@ main(int argc, char **argv)
         fprintf (stderr, "The user name should be more than 2 bytes and less than 16 bytes, only digits,  alphabetes and '-', '_' are allowed");
         exit(-ERR_NAME_INVALID);
     }
-            
+
     user_name = name;
     peer_name = g_strdup (name);
 
@@ -186,8 +191,15 @@ main(int argc, char **argv)
 
     /* create dir */
     if (ccnet_mkdir(config_dir, 0700) < 0) {
-        fprintf (stderr, "Make dir %s error: %s\n", 
+        fprintf (stderr, "Make dir %s error: %s\n",
                  config_dir, strerror(errno));
+        exit(-ERR_PERMISSION);
+    }
+
+    struct stat st;
+    if (g_stat(central_config_dir, &st) < 0 && ccnet_mkdir(central_config_dir, 0700) < 0) {
+        fprintf (stderr, "Make dir %s error: %s\n",
+                 central_config_dir, strerror(errno));
         exit(-ERR_PERMISSION);
     }
 
@@ -195,9 +207,9 @@ main(int argc, char **argv)
     save_privkey (peer_privkey, identity_file_peer);
 
     /* make configure file */
-    config_file = g_build_filename (config_dir, CONFIG_FILE_NAME, NULL);
+    config_file = g_build_filename (central_config_dir ? central_config_dir : config_dir, CONFIG_FILE_NAME, NULL);
     make_configure_file (config_file);
-    
+
     printf ("Successly create configuration dir %s.\n", config_dir);
     exit(0);
 }

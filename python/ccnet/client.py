@@ -3,6 +3,7 @@
 import os
 import socket
 import ConfigParser
+import logging
 
 from ccnet.packet import to_request_id, to_update_id
 from ccnet.packet import request_to_packet, update_to_packet
@@ -47,15 +48,22 @@ def parse_update(body):
 
 class Client(object):
     '''Base ccnet client class'''
-    def __init__(self, config_dir):
+    def __init__(self, config_dir, central_config_dir=None):
         if not isinstance(config_dir, unicode):
             config_dir = config_dir.decode('UTF-8')
 
+        if central_config_dir:
+            central_config_dir = os.path.expanduser(central_config_dir)
+            if not os.path.exists(central_config_dir):
+                raise RuntimeError(u'%s does not exits' % central_config_dir)
         config_dir = os.path.expanduser(config_dir)
-        config_file = os.path.join(config_dir, u'ccnet.conf')
+        config_file = os.path.join(central_config_dir if central_config_dir else config_dir,
+                                   u'ccnet.conf')
+        logging.info('using config file %s', config_file)
         if not os.path.exists(config_file):
             raise RuntimeError(u'%s does not exits' % config_file)
 
+        self.central_config_dir = central_config_dir
         self.config_dir = config_dir
         self.config_file = config_file
         self.config = None
@@ -120,7 +128,7 @@ class Client(object):
             return self.connect_daemon_with_pipe()
 
     def is_connected(self):
-        return self._connfd != None
+        return self._connfd is not None
 
     def send_request(self, id, req):
         id = to_request_id(id)

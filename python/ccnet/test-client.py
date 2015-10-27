@@ -3,6 +3,7 @@ import os
 from ccnet import ClientPool, RpcClientBase
 from pysearpc import searpc_func
 import threading
+import logging
 
 RPC_SERVICE_NAME = 'test-rpcserver'
 CCNET_CONF_DIR = os.path.expanduser('~/.ccnet')
@@ -27,7 +28,7 @@ class Worker(threading.Thread):
         assert self.rpc.str_mul(s, n) == s * n
 
 def test(n):
-    rpcclient = TestRpcClient(ClientPool(CCNET_CONF_DIR))
+    rpcclient = TestRpcClient(ClientPool(CCNET_CONF_DIR, CCNET_CONF_DIR))
 
     workers = []
     for i in xrange(n):
@@ -38,7 +39,18 @@ def test(n):
     for t in workers:
         t.join()
 
+def setup_logging():
+    kw = {
+        'format': '[%(asctime)s][%(module)s]: %(message)s',
+        'datefmt': '%m/%d/%Y %H:%M:%S',
+        'level': logging.DEBUG,
+        'stream': sys.stdout,
+    }
+
+    logging.basicConfig(**kw)
+
 def main():
+    setup_logging()
     if len(sys.argv) > 1:
         test(int(sys.argv[1]))
     else:

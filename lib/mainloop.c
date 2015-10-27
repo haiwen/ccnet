@@ -82,12 +82,12 @@ static void read_cb (int fd, short event, void *vclient)
  * event loop.
  */
 CcnetClient *
-ccnet_init (const char *confdir)
+ccnet_init (const char *central_config_dir, const char *confdir)
 {
     CcnetClient *client;
 
     client = ccnet_client_new ();
-    if ( (ccnet_client_load_confdir(client, confdir)) < 0 ) {
+    if ( (ccnet_client_load_confdir(client, central_config_dir, confdir)) < 0 ) {
         ccnet_warning ("Read config dir error\n");
         return NULL;
     }

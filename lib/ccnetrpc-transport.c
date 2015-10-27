@@ -79,12 +79,12 @@ invoke_service (CcnetClient *session,
 }
 
 static CcnetClient *
-create_new_client (const char *conf_dir)
+create_new_client (const char *central_config_dir, const char *conf_dir)
 {
     CcnetClient *client;
 
     client = ccnet_client_new ();
-    if (ccnet_client_load_confdir (client, conf_dir) < 0) {
+    if (ccnet_client_load_confdir (client, central_config_dir, conf_dir) < 0) {
         g_warning ("[Sea RPC] Failed to load conf dir.\n");
         g_object_unref (client);
         return NULL;
@@ -138,7 +138,7 @@ ccnetrpc_transport_send (void *arg, const gchar *fcall_str,
 
         g_message ("[Sea RPC] Ccnet disconnected. Connect again.\n");
 
-        new_session = create_new_client (session->config_dir);
+        new_session = create_new_client (session->central_config_dir, session->config_dir);
         if (!new_session) {
             *ret_len = 0;
             return NULL;

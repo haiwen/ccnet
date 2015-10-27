@@ -30,8 +30,8 @@ def debug_print(msg):
 
 class AsyncClient(Client):
     '''Async mode client'''
-    def __init__(self, config_dir, event_base):
-        Client.__init__(self, config_dir)
+    def __init__(self, config_dir, event_base, central_config_dir=None):
+        Client.__init__(self, config_dir, central_config_dir)
         self.proc_types = {}
         self.procs = {}
         self.register_processors()

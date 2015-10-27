@@ -13,8 +13,8 @@ class Response(object):
 
 class SyncClient(Client):
     '''sync mode client'''
-    def __init__(self, config_dir):
-        Client.__init__(self, config_dir)
+    def __init__(self, config_dir, central_config_dir=None):
+        Client.__init__(self, config_dir, central_config_dir)
         self._req_id = _REQ_ID_START
         self.mq_req_id = -1
 
