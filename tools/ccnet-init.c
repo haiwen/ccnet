@@ -197,9 +197,10 @@ main(int argc, char **argv)
     }
 
     struct stat st;
-    if (g_stat(central_config_dir, &st) < 0 && ccnet_mkdir(central_config_dir, 0700) < 0) {
-        fprintf (stderr, "Make dir %s error: %s\n",
-                 central_config_dir, strerror(errno));
+    if (central_config_dir && g_stat(central_config_dir, &st) < 0 &&
+        ccnet_mkdir(central_config_dir, 0700) < 0) {
+        fprintf(stderr, "Make dir %s error: %s\n", central_config_dir,
+                strerror(errno));
         exit(-ERR_PERMISSION);
     }
 
