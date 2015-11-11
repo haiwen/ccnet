@@ -59,7 +59,7 @@ class Client(object):
         config_dir = os.path.expanduser(config_dir)
         config_file = os.path.join(central_config_dir if central_config_dir else config_dir,
                                    u'ccnet.conf')
-        logging.info('using config file %s', config_file)
+        logging.debug('using config file %s', config_file)
         if not os.path.exists(config_file):
             raise RuntimeError(u'%s does not exits' % config_file)
 
