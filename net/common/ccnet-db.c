@@ -29,7 +29,8 @@ ccnet_db_new_mysql (const char *host,
                     const char *db_name,
                     const char *unix_socket,
                     gboolean use_ssl,
-                    const char *charset)
+                    const char *charset,
+                    int max_connections)
 {
     CcnetDB *db;
     GString *url;
@@ -72,6 +73,9 @@ ccnet_db_new_mysql (const char *host,
         return NULL;
     }
 
+    ccnet_message ("max_connections: %d\n", max_connections);
+
+    ConnectionPool_setMaxConnections (db->pool, max_connections);
     ConnectionPool_start (db->pool);
     db->type = CCNET_DB_TYPE_MYSQL;
 
