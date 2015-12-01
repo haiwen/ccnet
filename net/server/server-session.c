@@ -107,6 +107,7 @@ server_session_start (CcnetSession *session)
                       G_CALLBACK(on_peer_auth_done), NULL);    
 }
 
+#define DEFAULT_MAX_CONNECTIONS 100
 
 static int init_sqlite_database (CcnetSession *session)
 {
@@ -127,6 +128,7 @@ static int init_mysql_database (CcnetSession *session)
 {
     char *host, *port, *user, *passwd, *db, *unix_socket, *charset;
     gboolean use_ssl = FALSE;
+    int max_connections = 0;
 
     host = ccnet_key_file_get_string (session->keyf, "Database", "HOST");
     port = ccnet_key_file_get_string (session->keyf, "Database", "PORT");
@@ -159,7 +161,13 @@ static int init_mysql_database (CcnetSession *session)
     charset = ccnet_key_file_get_string (session->keyf,
                                          "Database", "CONNECTION_CHARSET");
 
-    session->db = ccnet_db_new_mysql (host, port, user, passwd, db, unix_socket, use_ssl, charset);
+    max_connections = g_key_file_get_integer (session->keyf,
+                                              "Database", "MAX_CONNECTIONS",
+                                              NULL);
+    if (max_connections <= 0)
+        max_connections = DEFAULT_MAX_CONNECTIONS;
+
+    session->db = ccnet_db_new_mysql (host, port, user, passwd, db, unix_socket, use_ssl, charset, max_connections);
     if (!session->db) {
         g_warning ("Failed to open database.\n");
         return -1;
