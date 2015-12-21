@@ -73,8 +73,6 @@ ccnet_db_new_mysql (const char *host,
         return NULL;
     }
 
-    ccnet_message ("max_connections: %d\n", max_connections);
-
     ConnectionPool_setMaxConnections (db->pool, max_connections);
     ConnectionPool_start (db->pool);
     db->type = CCNET_DB_TYPE_MYSQL;
