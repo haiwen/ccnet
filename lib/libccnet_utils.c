@@ -62,10 +62,6 @@ ccnet_util_pgpipe (ccnet_pipe_t handles[2])
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(0);
     serv_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-
-    BOOL reuse = 1;
-    setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse));
-
     if (bind(s, (SOCKADDR *) & serv_addr, len) == SOCKET_ERROR)
     {
         g_warning("pgpipe failed to bind: %d\n", WSAGetLastError());
