@@ -32,6 +32,7 @@
     /* Borrowed from libevent */
     #define ccnet_pipe_t intptr_t
 
+    /* ccnet_util_pipe() can only be called in the main loop. */
     int ccnet_util_pgpipe (ccnet_pipe_t handles[2]);
     #define ccnet_util_pipe(a) ccnet_util_pgpipe((a))
     #define ccnet_util_pipeclose(a) closesocket((a))
