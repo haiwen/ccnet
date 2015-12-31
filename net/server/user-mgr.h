@@ -106,6 +106,11 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
                                       const char *keyword,
                                       int start, int limit);
 
+GList*
+ccnet_user_manager_search_ldapusers (CcnetUserManager *manager,
+                                     const char *keyword,
+                                     int start, int limit);
+
 gint64
 ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *source);
 

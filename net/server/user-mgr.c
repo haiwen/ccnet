@@ -1445,6 +1445,28 @@ ccnet_user_manager_search_emailusers (CcnetUserManager *manager,
     return g_list_reverse (ret);
 }
 
+GList*
+ccnet_user_manager_search_ldapusers (CcnetUserManager *manager,
+                                     const char *keyword,
+                                     int start, int limit)
+{
+    GList *ret = NULL;
+
+#ifdef HAVE_LDAP
+    if (!manager->use_ldap) {
+        return NULL;
+    }
+
+    char *ldap_patt = g_strdup_printf ("*%s*", keyword);
+
+    ret = ldap_list_users (manager, ldap_patt, start, limit);
+
+    g_free (ldap_patt);
+#endif
+
+    return ret;
+}
+
 gint64
 ccnet_user_manager_count_emailusers (CcnetUserManager *manager, const char *source)
 {

@@ -115,6 +115,11 @@ ccnet_rpc_search_emailusers (const char *source,
                              int start, int limit,
                              GError **error);
 
+GList*
+ccnet_rpc_search_ldapusers (const char *keyword,
+                            int start, int limit,
+                            GError **error);
+
 /* Get total counts of email users. */
 gint64
 ccnet_rpc_count_emailusers (const char *source, GError **error);
