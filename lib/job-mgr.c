@@ -148,7 +148,10 @@ ccnet_job_manager_schedule_job (CcnetJobManager *mgr,
     
     g_hash_table_insert (mgr->jobs, (gpointer)(long)job->id, job);
 
-    job_thread_create (job);
+    if (job_thread_create (job) < 0) {
+        g_hash_table_remove (mgr->jobs, (gpointer)(long)job->id);
+        return -1;
+    }
 
     return job->id;
 }
