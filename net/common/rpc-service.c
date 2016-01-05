@@ -172,6 +172,10 @@ ccnet_start_rpc(CcnetSession *session)
                                      "search_emailusers",
                                      searpc_signature_objlist__string_string_int_int());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
+                                     ccnet_rpc_search_ldapusers,
+                                     "search_ldapusers",
+                                     searpc_signature_objlist__string_int_int());
+    searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_count_emailusers,
                                      "count_emailusers",
                                      searpc_signature_int64__string());
@@ -770,6 +774,19 @@ ccnet_rpc_search_emailusers (const char *source,
                                                        start, limit);
     
     return emailusers;
+}
+
+GList*
+ccnet_rpc_search_ldapusers (const char *keyword,
+                            int start, int limit,
+                            GError **error)
+{
+    GList *ldapusers = NULL;
+    CcnetUserManager *user_mgr = ((CcnetServerSession *)session)->user_mgr;
+
+    ldapusers = ccnet_user_manager_search_ldapusers (user_mgr, keyword,
+                                                     start, limit);
+    return ldapusers;
 }
 
 gint64
