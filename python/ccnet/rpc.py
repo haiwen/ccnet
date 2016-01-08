@@ -260,7 +260,7 @@ class CcnetThreadedRpcClient(RpcClientBase):
         pass
 
     @searpc_func("int", ["string", "string", "string"])
-    def create_group(self, group_name, user_name, gtype=None):
+    def create_group(self, group_name, user_name, gtype):
         pass
 
     @searpc_func("int", ["int", "string", "string"])
@@ -300,7 +300,7 @@ class CcnetThreadedRpcClient(RpcClientBase):
         pass
 
     @searpc_func("objlist", ["int", "int", "string"])
-    def get_all_groups(self, start, limit, source=None):
+    def get_all_groups(self, start, limit, source):
         pass
     
     @searpc_func("object", ["int"])
@@ -325,30 +325,6 @@ class CcnetThreadedRpcClient(RpcClientBase):
 
     @searpc_func("int", ["int", "string"])
     def set_group_creator(self, group_id, user_name):
-        pass
-
-    @searpc_func("int", ["int", "string", "string"])
-    def group_share_repo(self, group_id, user_name, repo_id):
-        pass
-
-    @searpc_func("int", ["int", "string", "string"])
-    def group_unshare_repo(self, group_id, user_name, repo_id):
-        pass
-
-    @searpc_func("string", ["int"])
-    def get_group_repoids(self, group_id):
-        pass
-
-    @searpc_func("objlist", ["string"])
-    def get_group_my_share_repos(self, username):
-        pass
-
-    @searpc_func("objlist", ["string"])
-    def get_group_user_share_repos(self, username):
-        pass
-    
-    @searpc_func("string", ["string"])
-    def get_group_repo_share_from(self, repo_id):
         pass
 
     @searpc_func("int", ["string", "string", "string"])
