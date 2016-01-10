@@ -256,12 +256,12 @@ main (int argc, char **argv)
 
     event_init ();
     evdns_init ();
-    if (ccnet_session_prepare(session, config_dir) < 0) {
+    if (ccnet_session_prepare(session, NULL, config_dir, FALSE) < 0) {
         fputs ("Error: failed to start ccnet session, "
                "see log file for the detail.\n", stderr);
         return -1;
     }
-    if (ccnet_session_prepare(inner_session, cluster_config_dir) < 0) {
+    if (ccnet_session_prepare(inner_session, NULL, cluster_config_dir, FALSE) < 0) {
         fputs ("Error: failed to start cluster ccnet session, "
                "see log file for the detail.\n", stderr);
         return -1;
