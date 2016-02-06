@@ -30,7 +30,7 @@ Compile
 
 To compile the client components, just
 
-    ./autogen.sh; ./configure; make; make install
+    ./autogen.sh && ./configure && make && make install
 
 To also compile the server components, use
 
