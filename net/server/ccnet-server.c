@@ -16,6 +16,7 @@
 #include "user-mgr.h"
 #include "rpc-service.h"
 #include "log.h"
+#include "curl-init.h"
 
 char *pidfile = NULL;
 CcnetSession  *session;
@@ -331,11 +332,13 @@ main (int argc, char **argv)
     setSigHandlers();
 #endif
 
+    ccnet_curl_init();
     ccnet_session_start (session);
     ccnet_start_rpc(session);
 
     /* actually enter the event loop */
     event_dispatch ();
+    ccnet_curl_deinit();
 
     return 0;
 }

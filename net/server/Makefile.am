@@ -60,7 +60,8 @@ common_headers =
 	../common/processor.h \
 	../common/peermgr-message.h \
 	../common/rpc-service.h \
-	../common/ccnet-db.h
+	../common/ccnet-db.h \
+	../common/curl-init.h
 
 
 noinst_HEADERS = $(common_headers) \
@@ -93,7 +94,8 @@ common_srcs = ../common/ccnet-db.c \
 	../common/processors/sendsessionkey-proc.c \
 	../common/processors/recvsessionkey-proc.c \
 	../common/processors/sendsessionkey-v2-proc.c \
-	../common/processors/recvsessionkey-v2-proc.c
+	../common/processors/recvsessionkey-v2-proc.c \
+	../common/curl-init.c
 
 ccnet_server_SOURCES = ccnet-server.c \
 	server-session.c user-mgr.c group-mgr.c org-mgr.c \

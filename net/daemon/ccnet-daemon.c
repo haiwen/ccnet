@@ -16,6 +16,7 @@
 #include "daemon-session.h"
 #include "rpc-service.h"
 #include "log.h"
+#include "curl-init.h"
 
 #ifndef SEAFILE_CLIENT_VERSION
 #define SEAFILE_CLIENT_VERSION PACKAGE_VERSION
@@ -217,12 +218,14 @@ main (int argc, char **argv)
     setSigHandlers();
 #endif
    
+    ccnet_curl_init();
     ccnet_session_start (session);
     ccnet_start_rpc(session);
 
     /* actually enter the event loop */
     /* event_set_log_callback (logFunc); */
     event_dispatch ();
+    ccnet_curl_deinit();
 
     return 0;
 }
