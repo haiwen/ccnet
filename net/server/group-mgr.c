@@ -731,25 +731,28 @@ ccnet_group_manager_get_all_groups (CcnetGroupManager *mgr,
     if (ccnet_db_type(mgr->priv->db) == CCNET_DB_TYPE_PGSQL) {
         if (start == -1 && limit == -1) {
             rc = ccnet_db_statement_foreach_row (db, "SELECT group_id, group_name, "
-                                                 "creator_name, timestamp FROM \"Group\"",
+                                                 "creator_name, timestamp FROM \"Group\" "
+                                                 "ORDER BY timestamp DESC",
                                                  get_all_ccnetgroups_cb, &ret,
                                                  0);
         } else {
             rc = ccnet_db_statement_foreach_row (db, "SELECT group_id, group_name, "
                                                  "creator_name, timestamp FROM \"Group\" "
-                                                 "ORDER BY group_id LIMIT ? OFFSET ?",
+                                                 "ORDER BY timestamp DESC LIMIT ? OFFSET ?",
                                                  get_all_ccnetgroups_cb, &ret,
                                                  2, "int", limit, "int", start);
         }
     } else {
         if (start == -1 && limit == -1) {
             rc = ccnet_db_statement_foreach_row (db, "SELECT `group_id`, `group_name`, "
-                                                 "`creator_name`, `timestamp` FROM `Group`",
+                                                 "`creator_name`, `timestamp` FROM `Group` "
+                                                 "ORDER BY timestamp DESC",
                                                  get_all_ccnetgroups_cb, &ret,
                                                  0);
         } else {
             rc = ccnet_db_statement_foreach_row (db, "SELECT `group_id`, `group_name`, "
-                                                 "`creator_name`, `timestamp` FROM `Group` LIMIT ?, ?",
+                                                 "`creator_name`, `timestamp` FROM `Group` "
+                                                 "ORDER BY timestamp DESC LIMIT ?, ?",
                                                  get_all_ccnetgroups_cb, &ret,
                                                  2, "int", start, "int", limit);
         }
