@@ -157,7 +157,7 @@ ccnet_util_checkdir_with_mkdir (const char *dir)
 
 
 ssize_t						/* Read "n" bytes from a descriptor. */
-ccnet_util_recvn(int fd, void *vptr, size_t n)
+ccnet_util_recvn (evutil_socket_t fd, void *vptr, size_t n)
 {
 	size_t	nleft;
 	ssize_t	nread;
@@ -186,7 +186,7 @@ ccnet_util_recvn(int fd, void *vptr, size_t n)
 }
 
 ssize_t						/* Write "n" bytes to a descriptor. */
-ccnet_util_sendn (int fd, const void *vptr, size_t n)
+ccnet_util_sendn (evutil_socket_t fd, const void *vptr, size_t n)
 {
 	size_t		nleft;
 	ssize_t		nwritten;
