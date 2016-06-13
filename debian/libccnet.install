@@ -1,0 +1,7 @@
+usr/bin/ccnet
+usr/bin/ccnet-init
+usr/bin/ccnet-tool
+usr/lib/*.so.*
+usr/lib/python2.7/dist-packages/ccnet/*.py
+usr/lib/python2.7/dist-packages/ccnet/async/*.py
+usr/lib/python2.7/dist-packages/ccnet/*.py
