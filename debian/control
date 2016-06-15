@@ -34,6 +34,7 @@ Depends:
     python,
     libsearpc1,
     libccnet0
+Conflicts: seafile
 Description: Ccnet for Seafile client.
     Ccnet is a framework for writing networked applications in C.
     It provides basic services like peer identification,
@@ -52,6 +53,7 @@ Depends:
     libevent-2.0-5,
     python,
     libsearpc1
+Conflicts: seafile
 Description: Shared libraries for package ccnet.
 
 Package: libccnet-dev
@@ -59,4 +61,5 @@ Section: libdevel
 Architecture: any
 Depends:
     libccnet0 (= ${binary:Version})
+Conflicts: seafile
 Description: Development files for package libccnet0.
