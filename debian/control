@@ -1,4 +1,4 @@
-Source: libccnet
+Source: ccnet
 Section: net
 Priority: extra
 Maintainer: m.eik michalke <meik.michalke@hhu.de>
@@ -20,7 +20,26 @@ Build-Depends:
 Standards-Version: 3.9.5
 Homepage: http://seafile.com
 
-Package: libccnet
+Package: ccnet
+Section: net
+Architecture: any
+Depends:
+    ${shlibs:Depends},
+    ${misc:Depends},
+    libglib2.0-0,
+    libsqlite3-0,
+    libuuid1,
+    libssl0.9.8 | libssl1.0.0,
+    libevent-2.0-5,
+    python,
+    libsearpc1,
+    libccnet0
+Description: Ccnet for Seafile client.
+    Ccnet is a framework for writing networked applications in C.
+    It provides basic services like peer identification,
+    connection management, service invocation, and message sending.
+
+Package: libccnet0
 Section: libs
 Architecture: any
 Depends:
@@ -32,15 +51,12 @@ Depends:
     libssl0.9.8 | libssl1.0.0,
     libevent-2.0-5,
     python,
-    libsearpc
-Description: Ccnet libraries for Seafile client.
-    Ccnet is a framework for writing networked applications in C.
-    It provides basic services like peer identification,
-    connection management, service invocation, and message sending.
+    libsearpc1
+Description: Shared libraries for package ccnet.
 
 Package: libccnet-dev
 Section: libdevel
 Architecture: any
 Depends:
-    libccnet (= ${binary:Version})
-Description: Development files for the libccnet package.
+    libccnet0 (= ${binary:Version})
+Description: Development files for package libccnet0.

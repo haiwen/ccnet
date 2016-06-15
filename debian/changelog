@@ -1,8 +1,8 @@
-libccnet (5.1.2-4) unstable; urgency=medium
+ccnet (5.1.2-4) unstable; urgency=medium
 
-  * split package libccnet and libccnet-dev
+  * split package ccnet, libccnet0 and libccnet-dev
   * updated the debian/copyright notice so people know who's responisble for the packaging
   * rewrote the rules file, much simpler now
   * prep for release on github
 
- -- m.eik michalke <meik.michalke@hhu.de>  Mon, 13 Jun 2016 19:41:00 +0200
+ -- m.eik michalke <meik.michalke@hhu.de>  Wed, 15 Jun 2016 22:36:08 +0200
