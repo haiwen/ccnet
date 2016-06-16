@@ -1,3 +1,9 @@
+ccnet (5.1.2-5) UNRELEASED; urgency=medium
+
+  * repackaging with cleaned up orig.tar.xz archives
+
+ -- m.eik michalke <meik.michalke@hhu.de>  Thu, 16 Jun 2016 14:33:11 +0200
+
 ccnet (5.1.2-4) unstable; urgency=medium
 
   * split package ccnet, libccnet0 and libccnet-dev
