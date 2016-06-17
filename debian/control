@@ -26,19 +26,12 @@ Architecture: any
 Depends:
     ${shlibs:Depends},
     ${misc:Depends},
-    libglib2.0-0,
-    libsqlite3-0,
-    libuuid1,
-    libssl0.9.8 | libssl1.0.0,
-    libevent-2.0-5,
-    python,
-    libsearpc1,
-    libccnet0
+    ${python:Depends}
 Conflicts: seafile
-Description: Ccnet for Seafile client.
-    Ccnet is a framework for writing networked applications in C.
-    It provides basic services like peer identification,
-    connection management, service invocation, and message sending.
+Description: Seafile client ccnet framework.
+ A framework for writing networked applications in C.
+ It provides basic services like peer identification,
+ connection management, service invocation, and message sending.
 
 Package: libccnet0
 Section: libs
@@ -46,20 +39,19 @@ Architecture: any
 Depends:
     ${shlibs:Depends},
     ${misc:Depends},
-    libglib2.0-0,
-    libsqlite3-0,
-    libuuid1,
-    libssl0.9.8 | libssl1.0.0,
-    libevent-2.0-5,
-    python,
-    libsearpc1
+    ${python:Depends}
 Conflicts: seafile
 Description: Shared libraries for package ccnet.
+ This package contains the shared libraries for the ccnet package.
+
 
 Package: libccnet-dev
 Section: libdevel
 Architecture: any
 Depends:
+    ${shlibs:Depends},
+    ${misc:Depends},
     libccnet0 (= ${binary:Version})
 Conflicts: seafile
 Description: Development files for package libccnet0.
+ This package contains the development files for the libccnet0 package.
