@@ -71,8 +71,8 @@ CcnetMessage *ccnet_message_from_string (char *buf, int len);
 gboolean ccnet_message_is_to_group(CcnetMessage *msg);
 
 /* to avoid string allocation */
-inline void ccnet_message_body_take (CcnetMessage *msg, char *body);
+/* inline void ccnet_message_body_take (CcnetMessage *msg, char *body); */
 
-inline void ccnet_message_body_dup (CcnetMessage *msg, char *body);
+/* inline void ccnet_message_body_dup (CcnetMessage *msg, char *body); */
 
 #endif

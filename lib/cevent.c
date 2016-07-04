@@ -22,7 +22,7 @@ CEventManager* cevent_manager_new ()
     return manager;
 }
 
-void pipe_callback (int fd, short event, void *vmgr)
+void pipe_callback (evutil_socket_t fd, short event, void *vmgr)
 {
     CEventManager *manager = (CEventManager *) vmgr;
     CEvent *cevent;

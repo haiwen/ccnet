@@ -58,7 +58,7 @@ job_thread_wrapper (void *vdata, void *unused)
 }
 
 static void
-job_done_cb (int fd, short event, void *vdata)
+job_done_cb (evutil_socket_t fd, short event, void *vdata)
 {
     CcnetJob *job = vdata;
     char buf[1];

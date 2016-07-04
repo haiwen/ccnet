@@ -385,7 +385,7 @@ static const char *net_status_string (int status)
     }
 }
 
-static void accept_local_client (int fd, short event, void *vsession)
+static void accept_local_client (evutil_socket_t fd, short event, void *vsession)
 {
     CcnetSession *session = vsession;
     CcnetPacketIO *io;

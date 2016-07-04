@@ -66,7 +66,7 @@ ccnet_register_service_sync (CcnetClient *client,
     return TRUE;
 }
 
-static void read_cb (int fd, short event, void *vclient)
+static void read_cb (evutil_socket_t fd, short event, void *vclient)
 {
     CcnetClient *client = vclient;
 

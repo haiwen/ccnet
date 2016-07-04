@@ -29,7 +29,7 @@ struct CcnetTimer
 };
 
 static void
-timer_callback (int fd, short event, void *vtimer)
+timer_callback (evutil_socket_t fd, short event, void *vtimer)
 {
     int more;
     struct CcnetTimer *timer = vtimer;
