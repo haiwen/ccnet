@@ -183,7 +183,7 @@ ccnet_rpc_create_org_group (int org_id, const char *group_name,
                             const char *user_name, GError **error);
 
 int
-ccnet_rpc_remove_group (int group_id, const char *user_name, GError **error);
+ccnet_rpc_remove_group (int group_id, GError **error);
 
 int
 ccnet_rpc_group_add_member (int group_id, const char *user_name,
