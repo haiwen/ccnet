@@ -219,7 +219,7 @@ ccnet_start_rpc(CcnetSession *session)
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_remove_group,
                                      "remove_group",
-                                     searpc_signature_int__int_string());
+                                     searpc_signature_int__int());
     searpc_server_register_function ("ccnet-threaded-rpcserver",
                                      ccnet_rpc_group_add_member,
                                      "group_add_member",
@@ -940,19 +940,19 @@ ccnet_rpc_create_org_group (int org_id, const char *group_name,
 }
 
 int
-ccnet_rpc_remove_group (int group_id, const char *user_name, GError **error)
+ccnet_rpc_remove_group (int group_id, GError **error)
 {
     CcnetGroupManager *group_mgr = 
         ((CcnetServerSession *)session)->group_mgr;
     int ret;
 
-    if (group_id <= 0 || !user_name) {
+    if (group_id <= 0) {
         g_set_error (error, CCNET_DOMAIN, CCNET_ERR_INTERNAL,
-                     "Group id and user name can not be NULL");
+                     "Invalid group_id parameter");
         return -1;
     }
 
-    ret = ccnet_group_manager_remove_group (group_mgr, group_id, user_name, error);
+    ret = ccnet_group_manager_remove_group (group_mgr, group_id, error);
 
     return ret;
     
@@ -1258,8 +1258,7 @@ ccnet_rpc_remove_org (int org_id, GError **error)
     group_ids = ccnet_org_manager_get_org_groups (org_mgr, org_id, 0, INT_MAX);
     ptr = group_ids;
     while (ptr) {
-        ccnet_group_manager_remove_group (group_mgr, (int)(long)ptr->data, NULL,
-                                          error);
+        ccnet_group_manager_remove_group (group_mgr, (int)(long)ptr->data, error);
         ptr = ptr->next;
     }
     g_list_free (group_ids);

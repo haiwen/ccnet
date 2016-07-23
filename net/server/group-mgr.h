@@ -37,7 +37,6 @@ int ccnet_group_manager_create_org_group (CcnetGroupManager *mgr,
 
 int ccnet_group_manager_remove_group (CcnetGroupManager *mgr,
                                       int group_id,
-                                      const char *user_name,
                                       GError **error);
 
 int ccnet_group_manager_add_member (CcnetGroupManager *mgr,

@@ -354,7 +354,6 @@ check_group_staff (CcnetDB *db, int group_id, const char *user_name)
 
 int ccnet_group_manager_remove_group (CcnetGroupManager *mgr,
                                       int group_id,
-                                      const char *user_name,
                                       GError **error)
 {
     CcnetDB *db = mgr->priv->db;
