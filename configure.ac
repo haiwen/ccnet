@@ -2,7 +2,7 @@ dnl Process this file with autoconf to produce a configure script.
 
 
 AC_PREREQ(2.61)
-AC_INIT([ccnet], [5.1.4], [daniel.pan@seafile.com])
+AC_INIT([ccnet], [6.0.0], [daniel.pan@seafile.com])
 AC_CONFIG_SRCDIR([net/daemon/ccnet-daemon.c])
 AC_CONFIG_HEADER([config.h])
 
