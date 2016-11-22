@@ -55,3 +55,21 @@ Depends:
 Conflicts: seafile
 Description: Development files for package libccnet0.
  This package contains the development files for the libccnet0 package.
+
+Package: ccnet-dbg
+Section: debug
+Architecture: any
+Depends:
+    ccnet (= ${binary:Version}),
+    ${misc:Depends},
+Description: Debugging symbols for the ccnet package.
+ This package contains the debugging symbols for the ccnet package.
+
+Package: libccnet-dbg
+Section: debug
+Architecture: any
+Depends:
+    libccnet0 (= ${binary:Version}),
+    ${misc:Depends},
+Description: Debugging symbols for the libccnet package.
+ This package contains the debugging symbols for the libccnet0 package.
