@@ -500,9 +500,14 @@ int ccnet_group_manager_set_group_name (CcnetGroupManager *mgr,
 {
     CcnetDB *db = mgr->priv->db;
 
+    char *sql;
+    if (ccnet_db_type(db) == CCNET_DB_TYPE_PGSQL) {
+        sql = "UPDATE \"Group\" SET group_name = ? WHERE group_id = ?";
+    } else {
+        sql = "UPDATE `Group` SET group_name = ? WHERE group_id = ?";
+    }
     ccnet_db_statement_query (db,
-                              "UPDATE `Group` SET group_name = ? "
-                              "WHERE group_id = ?",
+                              sql,
                               2, "string", group_name, "int", group_id);
 
     return 0;
