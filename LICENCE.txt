@@ -1,3 +1,5 @@
+COPYRIGHT 2012 - Seafile Ltd. <info@seafile.com>
+
 This program is released under GPLv2, with the following addition
 permission to link with OpenSSL library.
 
@@ -9,6 +11,13 @@ grants you additional permission to convey the resulting work.
 Corresponding Source for a non-source form of such a combination
 shall include the source code for the parts of OpenSSL used as well
 as that of the covered work.
+
+Some individual files have their speicific license:
+
+* lib/buffer.c is from libevent, so it has a BSD-3-clause license.
+
+ Copyright (c) 2002-2007 Niels Provos <provos@citi.umich.edu>
+ Copyright (c) 2007-2010 Niels Provos and Nick Mathewson
 
 
                     GNU GENERAL PUBLIC LICENSE
