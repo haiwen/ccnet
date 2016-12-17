@@ -60,98 +60,6 @@ else
   AC_MSG_RESULT(no)
 fi
 
-# test which sub-component to compile
-
-compile_cli=yes
-compile_tools=yes
-compile_server=no
-
-if test "$bwin32" = true; then
-   compile_client=yes
-   compile_cli=no
-   compile_tools=no
-fi
-
-if test "$bmac" = true; then
-   compile_client=yes
-   compile_cli=no
-   compile_tools=no
-fi
-
-#if test "$blinux" = true || test "$bwin32" = true ; then
-AC_ARG_ENABLE(client, AC_HELP_STRING([--enable-client], [enable client]),
-   [compile_client=$enableval],[compile_client="yes"])
-
-if test "$compile_client" = yes; then
-   compile_gui=yes
-fi
-
-AC_ARG_ENABLE(server, AC_HELP_STRING([--enable-server], [enable server]),
-   [compile_server=$enableval],[compile_server="no"])
-
-
-AC_ARG_ENABLE(ldap, AC_HELP_STRING([--enable-ldap], [enable LDAP]),
-   [compile_ldap=$enableval],[compile_ldap="no"])
-
-AC_ARG_ENABLE(cluster, AC_HELP_STRING([--enable-cluster],
-   [enable cluster]), [compile_cluster=$enableval],
-   [compile_cluster="no"])
-
-AC_ARG_ENABLE(python,
-              AC_HELP_STRING([--enable-python],[build ccnet python binding]),
-              [compile_python=$enableval],
-              [compile_python=yes])
-
-
-AC_ARG_ENABLE(server-pkg, AC_HELP_STRING([--enable-server-pkg], [enable static compile]),
-    [server_pkg=$enableval],[server_pkg="no"])
-
-AM_CONDITIONAL([SERVER_ONLY], [test "${server_pkg}" = "yes"])
-
-
-AC_ARG_ENABLE(static-build, AC_HELP_STRING([--enable-static-build], [enable static compile]),
-    [static_comp=$enableval],[static_comp="no"])
-
-if test x${static_comp} = xyes; then
-  STATIC_COMPILE=-static
-fi
-AC_SUBST(STATIC_COMPILE)
-
-# check demo
-# option: compile-demo
-# default: yes
-AC_ARG_ENABLE([compile-demo],
-AS_HELP_STRING([--enable-compile-demo],
-               [compile demo programs @<:@default: yes@:>@]),
-               [compile_demo=${enableval}],
-               [compile_demo=yes])
-
-
-# If we're building server release package, set the run-time path
-# for the executables. So that the loader will lookup shared libs
-# in 'lib' dir of the release package.
-# Read "man ld.so" for description of $ORIGIN.
-# Refer to http://blog.linuxgamepublishing.com/2009/02/08/our-new-way-to-meet-the-lgpl/
-if test x${server_pkg} = xyes; then
-  compile_client=no
-  compile_cli=yes
-  compile_tools=yes
-  compile_server=yes
-
-  SERVER_PKG_RPATH=-Wl,-R,\'\$\$ORIGIN/../lib\'
-  SERVER_PKG_PY_RPATH=-Wl,-R,\'\$\$ORIGIN/../../..\'
-fi
-AC_SUBST(SERVER_PKG_RPATH)
-AC_SUBST(SERVER_PKG_PY_RPATH)
-
-AM_CONDITIONAL([COMPILE_CLI], [test "${compile_cli}" = "yes"])
-AM_CONDITIONAL([COMPILE_TOOLS], [test "${compile_tools}" = "yes"])
-AM_CONDITIONAL([COMPILE_PYTHON], [test "${compile_python}" = "yes"])
-AM_CONDITIONAL([COMPILE_CLIENT], [test "${compile_client}" = "yes"])
-AM_CONDITIONAL([COMPILE_SERVER], [test "${compile_server}" = "yes"])
-AM_CONDITIONAL([COMPILE_CLUSTER], [test "${compile_cluster}" = "yes"])
-AM_CONDITIONAL([COMPILE_DEMO], [test "${compile_demo}" = "yes"])
-
 AM_CONDITIONAL([WIN32], [test "$bwin32" = "true"])
 AM_CONDITIONAL([MACOS], [test "$bmac" = "true"])
 AM_CONDITIONAL([LINUX], [test "$blinux" = "true"])
@@ -263,10 +171,7 @@ APPINDICATOR_REQUIRED=0.0.7
 GLIB_REQUIRED=2.16.0
 GTK_REQUIRED=2.16.0
 SEARPC_REQUIRED=1.0
-ZDB_REQUIRED=2.10
-LIBNAUTILUS_EXTENSION_REQUIRED=2.30.1
 SEARPC_REQUIRED=1.0
-CURL_REQUIRED=7.17
 
 PKG_CHECK_MODULES(SSL, [openssl])
 AC_SUBST(SSL_CFLAGS)
@@ -288,88 +193,26 @@ PKG_CHECK_MODULES(LIBEVENT, [libevent >= $LIBEVENT_REQUIRED])
 AC_SUBST(LIBEVENT_CFLAGS)
 AC_SUBST(LIBEVENT_LIBS)
 
-if test x${compile_python} = xyes; then
-   AM_PATH_PYTHON([2.6])
+AM_PATH_PYTHON([2.6])
 
-   if test "$bwin32" = true; then
-       # set pyexecdir to somewhere like /c/Python26/Lib/site-packages
-       pyexecdir=${PYTHON_DIR}/Lib/site-packages
-       pythondir=${pyexecdir}
-       pkgpyexecdir=${pyexecdir}/${PACKAGE}
-       pkgpythondir=${pythondir}/${PACKAGE}
-
-   fi # end for bwin32
-
-fi
-
-
-# Check libzdb if compile seafile server
-if test "${compile_server}" = "yes"; then
-   PKG_CHECK_MODULES(ZDB, [zdb >= $ZDB_REQUIRED])
-   AC_SUBST(ZDB_CFLAGS)
-   AC_SUBST(ZDB_LIBS)
-
-fi
-
-if test "${compile_ldap}" = "yes"; then
-   if test "$bwin32" != true; then
-      AC_CHECK_LIB(ldap, ldap_init, [have_ldap="yes"],
-         AC_MSG_ERROR([*** Unable to find ldap client library]), )
-
-      if test "${have_ldap}" = "yes"; then
-         echo "found ldap client library"
-         AC_DEFINE([HAVE_LDAP], [1], [Define if ldap library exists.])
-         AC_SUBST(LDAP_LIBS, "-lldap -llber")
-      fi
-   else
-      AC_DEFINE([HAVE_LDAP], [1], [Define if ldap library exists.])
-      AC_SUBST(LDAP_LIBS, "-lWldap32")
-   fi
-
-
-fi
+if test "$bwin32" = true; then
+    # set pyexecdir to somewhere like /c/Python26/Lib/site-packages
+    pyexecdir=${PYTHON_DIR}/Lib/site-packages
+    pythondir=${pyexecdir}
+    pkgpyexecdir=${pyexecdir}/${PACKAGE}
+    pkgpythondir=${pythondir}/${PACKAGE}
+fi # end for bwin32
 
 ac_configure_args="$ac_configure_args -q"
 
 AC_CONFIG_FILES(
-	Makefile
+    Makefile
     libccnet.pc
     net/Makefile
     net/daemon/Makefile
-    net/server/Makefile
-    net/cluster/Makefile
-    cli/Makefile
     lib/Makefile
-    tools/Makefile
     include/Makefile
     include/ccnet/Makefile
-    python/Makefile
-    python/ccnet/Makefile
-    tests/Makefile
-    tests/common-conf.sh
-    demo/Makefile
 )
 
 AC_OUTPUT
-
-
-echo
-echo "The following modules will be built:"
-echo
-if test x${compile_python} = xyes; then
-   echo     "python"
-fi
-if test x${compile_client} = xyes; then
-   echo    "ccnet-daemon"
-fi
-if test x${compile_server} = xyes; then
-   echo    "ccnet-server"
-fi
-if test x${compile_cluster} = xyes; then
-   echo    "cluster"
-fi
-if test x${compile_demo} = xyes; then
-   echo    "demo"
-fi
-
-echo
