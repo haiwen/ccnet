@@ -8,7 +8,6 @@
 #include "peer.h"
 #include "message.h"
 #include "sendmsg-proc.h"
-#include "bloom-filter.h"
 #include "message-manager.h"
 
 #define DEBUG_FLAG CCNET_DEBUG_MESSAGE
@@ -75,28 +74,6 @@ send_msg_start (CcnetProcessor *processor, int argc, char **argv)
     return 0;
 }
 
-#if 0
-static gboolean
-need_send_bloom (CcnetProcessor *processor, CcnetMessage *msg)
-{
-    CcnetGroupManager *group_mgr = processor->session->groupMgr;
-    CcnetGroup *group;
-
-    /* just pass through relayed message */
-    if (g_strcmp0 (processor->session->base.id, msg->from) != 0)
-        return TRUE;
-
-    group = ccnet_group_manager_get_group (group_mgr,
-                                           msg->to);
-    if (!group)
-        return FALSE;
-    if (!ccnet_group_is_a_maintainer (group, processor->peer->id))
-        return FALSE;
-
-    return TRUE;
-}
-#endif
-
 static void handle_response (CcnetProcessor *processor,
                              char *code, char *code_msg,
                              char *content, int clen)
@@ -109,10 +86,6 @@ static void handle_response (CcnetProcessor *processor,
         processor->state = CONNECTED;
 
         char save_flags = priv->message->flags;
-        /* if ((priv->message->flags & FLAG_TO_GROUP) && */
-        /*     (priv->message->flags & FLAG_WITH_BLOOM) && */
-        /*     !need_send_bloom (processor, priv->message)) */
-        /*     priv->message->flags &= ~FLAG_WITH_BLOOM; */
 
         msg_buf = g_string_new (NULL);
         ccnet_message_to_string_buf (priv->message, msg_buf);

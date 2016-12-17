@@ -22,8 +22,6 @@ The following packages are required to build ccnet:
 
     valac >= 0.8
     libsearpc
-    libmysqlclient-dev for compiling ccnet server
-    libzdb >= 2.10.2
 
 Compile
 =======
@@ -31,11 +29,3 @@ Compile
 To compile the client components, just
 
     ./autogen.sh && ./configure && make && make install
-
-To also compile the server components, use
-
-    ./configure --enable-server
-
-In Mac OS, use
-
-    LDFLAGS="-L/opt/local/lib -L/usr/local/mysql/lib -Xlinker -headerpad_max_install_names" ./configure --enable-server

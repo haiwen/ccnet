@@ -23,7 +23,6 @@ noinst_HEADERS = buffer.h \
 	rpc-common.h \
 	net.h \
 	utils.h \
-	bloom-filter.h \
 	db.h \
 	rsa.h
 
@@ -55,7 +54,7 @@ libccnet_la_LIBADD = @PTHREAD_LIBS@ @GLIB2_LIBS@ @GOBJECT_LIBS@ @SSL_LIBS@ @LIB_
 noinst_LTLIBRARIES = libccnetd.la
 
 libccnetd_la_SOURCES = utils.c db.c job-mgr.c \
-	rsa.c bloom-filter.c marshal.c net.c timer.c ccnet-session-base.c \
+	rsa.c marshal.c net.c timer.c ccnet-session-base.c \
 	ccnetobj.c
 
 libccnetd_la_LDFLAGS = -no-undefined

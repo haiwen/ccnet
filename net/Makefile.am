@@ -1,14 +1,2 @@
 
-if COMPILE_SERVER
-    MAKE_SERVER = server
-endif
-
-if COMPILE_CLIENT
-    MAKE_DAEMON = daemon
-endif
-
-if COMPILE_CLUSTER
-    MAKE_CLUSTER = cluster
-endif
-
-SUBDIRS = $(MAKE_DAEMON) $(MAKE_SERVER) $(MAKE_CLUSTER)
+SUBDIRS = daemon
