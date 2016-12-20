@@ -46,7 +46,7 @@ libccnet_la_SOURCES = ccnet-client.c packet-io.c libccnet_utils.c \
 EXTRA_DIST = ccnetobj.vala rpc_table.py
 
 libccnet_la_LDFLAGS = -no-undefined -version-info 0:0:0
-libccnet_la_LIBADD = @PTHREAD_LIBS@ @GLIB2_LIBS@ @GOBJECT_LIBS@ @SSL_LIBS@ @LIB_GDI32@ \
+libccnet_la_LIBADD = @PTHREAD_LIBS@ @GLIB2_LIBS@ @GOBJECT_LIBS@ @LIB_GDI32@ \
 				     @LIB_UUID@ @LIB_WS32@ @LIB_PSAPI@ -lsqlite3 \
 					 @LIBEVENT_LIBS@ @SEARPC_LIBS@ @LIB_SHELL32@
 
