@@ -7,6 +7,7 @@ AM_CPPFLAGS = @GLIB2_CFLAGS@ @GOBJECT_CFLAGS@ \
 	-I$(top_builddir)/include \
 	-I$(top_builddir)/lib \
 	@SEARPC_CFLAGS@ \
+	@SSL_CFLAGS@ \
 	-Wall
 
 bin_PROGRAMS = ccnet
