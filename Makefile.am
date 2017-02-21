@@ -5,7 +5,7 @@ pcfiles = libccnet.pc
 pkgconfig_DATA = $(pcfiles)
 pkgconfigdir = $(libdir)/pkgconfig
 
-SUBDIRS = include lib net python
+SUBDIRS = include lib net python tools
 
 EXTRA_DIST = install-sh libccnet.pc.in LICENSE.txt
 

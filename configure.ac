@@ -215,6 +215,7 @@ AC_CONFIG_FILES(
     include/ccnet/Makefile
     python/Makefile
     python/ccnet/Makefile
+    tools/Makefile
 )
 
 AC_OUTPUT
