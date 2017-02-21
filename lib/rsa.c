@@ -16,8 +16,11 @@ private_key_to_pub(RSA *priv)
 {
     RSA *pub = RSA_new();
 
-    pub->n = BN_dup(priv->n);
-    pub->e = BN_dup(priv->e);
+    if ( pub == NULL)
+        g_error ("rsa_generate_public_key: key generation failed.");
+    else
+        pub->n = BN_dup(priv->n);
+        pub->e = BN_dup(priv->e);
 
     return pub;
 }
