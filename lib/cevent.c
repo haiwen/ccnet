@@ -29,7 +29,6 @@ void pipe_callback (evutil_socket_t fd, short event, void *vmgr)
     char buf[CEVENT_SIZE];
     
     if (ccnet_util_pipereadn(fd, buf, CEVENT_SIZE) != CEVENT_SIZE) {
-        g_warning ("read pipe error\n");
         return;
     }
 

@@ -53,7 +53,7 @@ job_thread_wrapper (void *vdata, void *unused)
     
     job->result = job->thread_func (job->data);
     if (pipewriten (job->pipefd[1], "a", 1) != 1) {
-        g_warning ("[Job Manager] write to pipe error: %s\n", strerror(errno));
+        /* g_warning ("[Job Manager] write to pipe error: %s\n", strerror(errno)); */
     }
 }
 
@@ -64,7 +64,7 @@ job_done_cb (evutil_socket_t fd, short event, void *vdata)
     char buf[1];
 
     if (pipereadn (job->pipefd[0], buf, 1) != 1) {
-        g_warning ("[Job Manager] read pipe error: %s\n", strerror(errno));
+        /* g_warning ("[Job Manager] read pipe error: %s\n", strerror(errno)); */
     }
     pipeclose (job->pipefd[0]);
     pipeclose (job->pipefd[1]);
@@ -79,7 +79,7 @@ int
 job_thread_create (CcnetJob *job)
 {
     if (ccnet_pipe (job->pipefd) < 0) {
-        g_warning ("pipe error: %s\n", strerror(errno));
+        /* g_warning ("pipe error: %s\n", strerror(errno)); */
         return -1;
     }
 
