@@ -3,4 +3,3 @@ usr/lib/pkgconfig
 usr/lib/libccnet.a
 usr/lib/libccnet.la
 usr/lib/libccnet.so
-usr/bin/ccnet-servtool
