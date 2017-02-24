@@ -11,13 +11,55 @@
 #include "rsa.h"
 #include "utils.h"
 
+/* Forward compatibility functions if libssl < 1.1.0. */
+
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+
+int RSA_set0_key(RSA *r, BIGNUM *n, BIGNUM *e, BIGNUM *d)
+{
+   /* If the fields n and e in r are NULL, the corresponding input
+    * parameters MUST be non-NULL for n and e.  d may be
+    * left NULL (in case only the public key is used).
+    */
+   if ((r->n == NULL && n == NULL)
+       || (r->e == NULL && e == NULL))
+       return 0;
+   if (n != NULL) {
+       BN_free(r->n);
+       r->n = n;
+   }
+   if (e != NULL) {
+       BN_free(r->e);
+       r->e = e;
+   }
+   if (d != NULL) {
+       BN_free(r->d);
+       r->d = d;
+   }
+   return 1;
+}
+
+void RSA_get0_key(const RSA *r,
+                 const BIGNUM **n, const BIGNUM **e, const BIGNUM **d)
+{
+   if (n != NULL)
+       *n = r->n;
+   if (e != NULL)
+       *e = r->e;
+   if (d != NULL)
+       *d = r->d;
+}
+
+#endif
+
 RSA*
 private_key_to_pub(RSA *priv)
 {
     RSA *pub = RSA_new();
+    const BIGNUM *n, *e;
 
-    pub->n = BN_dup(priv->n);
-    pub->e = BN_dup(priv->e);
+    RSA_get0_key (priv, &n, &e, NULL);
+    RSA_set0_key (pub, BN_dup(n), BN_dup(e), NULL);
 
     return pub;
 }
@@ -28,18 +70,21 @@ GString* public_key_to_gstring(const RSA *rsa)
     GString *buf = g_string_new(NULL);
     unsigned char *temp;
     char *coded;
+    const BIGNUM *n, *e;
 
-    gsize len = BN_num_bytes(rsa->n);
+    RSA_get0_key (rsa, &n, &e, NULL);
+
+    gsize len = BN_num_bytes(n);
     temp = malloc(len);
-    BN_bn2bin(rsa->n, temp);
+    BN_bn2bin(n, temp);
     coded = g_base64_encode(temp, len);
     g_string_append (buf, coded);
     g_string_append_c (buf, ' ');
     g_free(coded);
     
-    len = BN_num_bytes(rsa->e);
+    len = BN_num_bytes(e);
     temp = realloc(temp, len);
-    BN_bn2bin(rsa->e, temp);
+    BN_bn2bin(e, temp);
     coded = g_base64_encode(temp, len);
     g_string_append (buf, coded);
     g_free(coded);
@@ -54,18 +99,21 @@ public_key_append_to_gstring(const RSA *rsa, GString *buf)
 {
     unsigned char *temp;
     char *coded;
+    const BIGNUM *n, *e;
 
-    gsize len = BN_num_bytes(rsa->n);
+    RSA_get0_key (rsa, &n, &e, NULL);
+
+    gsize len = BN_num_bytes(n);
     temp = malloc(len);
-    BN_bn2bin(rsa->n, temp);
+    BN_bn2bin(n, temp);
     coded = g_base64_encode(temp, len);
     g_string_append (buf, coded);
     g_string_append_c (buf, ' ');
     g_free(coded);
     
-    len = BN_num_bytes(rsa->e);
+    len = BN_num_bytes(e);
     temp = realloc(temp, len);
-    BN_bn2bin(rsa->e, temp);
+    BN_bn2bin(e, temp);
     coded = g_base64_encode(temp, len);
     g_string_append (buf, coded);
     g_free(coded);
@@ -86,24 +134,31 @@ RSA* public_key_from_string(char *str)
     *p = '\0';
 
     RSA *key = RSA_new();
+    BIGNUM *n = NULL, *e = NULL;
 
     num = g_base64_decode(str, &len);
-    key->n = BN_bin2bn(num, len, NULL);
-    if (!key->n)
+    n = BN_bin2bn(num, len, NULL);
+    if (!n)
         goto err;
     g_free(num);
     
     num = g_base64_decode(p+1, &len);
-    key->e = BN_bin2bn(num, len, NULL);
-    if (!key->e)
+    e = BN_bin2bn(num, len, NULL);
+    if (!e)
         goto err;
     g_free(num);
+
+    RSA_set0_key (key, n, e, NULL);
 
     *p = ' ';
     return key;
 err:
     *p = ' ';
     RSA_free (key);
+    if (n)
+        BN_free (n);
+    if (e)
+        BN_free (e);
     g_free(num);
     return NULL;
 }

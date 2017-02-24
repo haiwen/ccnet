@@ -1053,14 +1053,14 @@ ccnet_encrypt_with_key (char **data_out,
         return -1;
     }
 
-    EVP_CIPHER_CTX ctx;
+    EVP_CIPHER_CTX *ctx;
     int ret;
     int blks;
 
     /* Prepare CTX for encryption. */
-    EVP_CIPHER_CTX_init (&ctx);
+    ctx = EVP_CIPHER_CTX_new ();
 
-    ret = EVP_EncryptInit_ex (&ctx,
+    ret = EVP_EncryptInit_ex (ctx,
                               EVP_aes_256_cbc(), /* cipher mode */
                               NULL, /* engine, NULL for default */
                               key,  /* derived key */
@@ -1068,6 +1068,7 @@ ccnet_encrypt_with_key (char **data_out,
 
     if (ret == ENC_FAILURE) {
         g_warning ("error init\n");
+        EVP_CIPHER_CTX_free (ctx);
         return -1;
     }
 
@@ -1089,7 +1090,7 @@ ccnet_encrypt_with_key (char **data_out,
     int update_len, final_len;
 
     /* Do the encryption. */
-    ret = EVP_EncryptUpdate (&ctx,
+    ret = EVP_EncryptUpdate (ctx,
                              (unsigned char*)*data_out,
                              &update_len,
                              (unsigned char*)data_in,
@@ -1100,7 +1101,7 @@ ccnet_encrypt_with_key (char **data_out,
     }
 
     /* Finish the possible partial block. */
-    ret = EVP_EncryptFinal_ex (&ctx,
+    ret = EVP_EncryptFinal_ex (ctx,
                                (unsigned char*)*data_out + update_len,
                                &final_len);
     *out_len = update_len + final_len;
@@ -1109,11 +1110,11 @@ ccnet_encrypt_with_key (char **data_out,
         goto enc_error;
     }
 
-    EVP_CIPHER_CTX_cleanup (&ctx);
+    EVP_CIPHER_CTX_free (ctx);
     return 0;
 
 enc_error:
-    EVP_CIPHER_CTX_cleanup (&ctx);
+    EVP_CIPHER_CTX_free (ctx);
     *out_len = -1;
     if (*data_out != NULL)
         g_free (*data_out);
@@ -1138,22 +1139,24 @@ ccnet_decrypt_with_key (char **data_out,
         return -1;
     }
 
-    EVP_CIPHER_CTX ctx;
+    EVP_CIPHER_CTX *ctx;
     int ret;
 
     *data_out = NULL;
     *out_len = -1;
 
     /* Prepare CTX for decryption. */
-    EVP_CIPHER_CTX_init (&ctx);
-    ret = EVP_DecryptInit_ex (&ctx,
+    ctx = EVP_CIPHER_CTX_new ();
+    ret = EVP_DecryptInit_ex (ctx,
                               EVP_aes_256_cbc(), /* cipher mode */
                               NULL, /* engine, NULL for default */
                               key,  /* derived key */
                               iv);  /* initial vector */
 
-    if (ret == DEC_FAILURE)
+    if (ret == DEC_FAILURE) {
+        EVP_CIPHER_CTX_free (ctx);
         return -1;
+    }
 
     /* Allocating output buffer. */
     *data_out = (char *)g_malloc (in_len);
@@ -1165,7 +1168,7 @@ ccnet_decrypt_with_key (char **data_out,
     int update_len, final_len;
 
     /* Do the decryption. */
-    ret = EVP_DecryptUpdate (&ctx,
+    ret = EVP_DecryptUpdate (ctx,
                              (unsigned char*)*data_out,
                              &update_len,
                              (unsigned char*)data_in,
@@ -1174,7 +1177,7 @@ ccnet_decrypt_with_key (char **data_out,
         goto dec_error;
 
     /* Finish the possible partial block. */
-    ret = EVP_DecryptFinal_ex (&ctx,
+    ret = EVP_DecryptFinal_ex (ctx,
                                (unsigned char*)*data_out + update_len,
                                &final_len);
     *out_len = update_len + final_len;
@@ -1182,11 +1185,11 @@ ccnet_decrypt_with_key (char **data_out,
     if (ret == DEC_FAILURE || *out_len > in_len)
         goto dec_error;
 
-    EVP_CIPHER_CTX_cleanup (&ctx);
+    EVP_CIPHER_CTX_free (ctx);
     return 0;
 
 dec_error:
-    EVP_CIPHER_CTX_cleanup (&ctx);
+    EVP_CIPHER_CTX_free (ctx);
     *out_len = -1;
     if (*data_out != NULL)
         g_free (*data_out);
