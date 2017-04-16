@@ -1,4 +1,4 @@
-[![Build Status](https://secure.travis-ci.org/haiwen/ccnet.png?branch=master)](http://travis-ci.org/haiwen/ccnet)
+[![Build Status](https://secure.travis-ci.org/haiwen/ccnet.svg?branch=master)](http://travis-ci.org/haiwen/ccnet)
 
 Ccnet is a framework for writing networked applications in C. It
 provides the following basic services:
