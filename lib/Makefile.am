@@ -71,11 +71,11 @@ ccnet-client.c: ccnet-object.h
 
 ccnet-object.h: ${ccnet_object_define}
 	rm -f $@
-	valac --pkg posix ${ccnet_object_define} -C -H ccnet-object.h
+	@VALAC@ --pkg posix ${ccnet_object_define} -C -H ccnet-object.h
 
 ccnetobj.c: ${ccnet_object_define}
 	rm -f $@
-	valac -C --pkg posix ${ccnet_object_define}
+	@VALAC@ -C --pkg posix ${ccnet_object_define}
 
 searpc_gen = searpc-signature.h searpc-marshal.h
 
