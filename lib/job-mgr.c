@@ -153,7 +153,7 @@ ccnet_job_manager_schedule_job (CcnetJobManager *mgr,
         return -1;
     }
 
-    return job->id;
+    return 0;
 }
 
 void
