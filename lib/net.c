@@ -216,8 +216,6 @@ ccnet_net_bind_tcp (int port, int nonblock)
         evutil_closesocket (s);
         return -1;
     }
-    if (nonblock)
-        s = makeSocketNonBlocking (s);
      
     return s;
 #endif
