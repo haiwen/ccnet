@@ -6,6 +6,7 @@ AM_CPPFLAGS = @GLIB2_CFLAGS@ -I$(top_srcdir)/include \
 	-DG_LOG_DOMAIN=\"Ccnet\" \
 	@SEARPC_CFLAGS@ \
 	@MSVC_CFLAGS@ \
+	@SSL_CFLAGS@ \
 	-Wall
 
 BUILT_SOURCES = gensource
@@ -29,7 +30,7 @@ noinst_HEADERS = buffer.h \
 ccnetincludedir = $(includedir)/ccnet
 ccnetinclude_DATA = ccnet-object.h
 
-libccnet_la_CPPFLAGS = $(AM_CPPFLAGS) -DCCNET_LIB @PTHREAD_CFLAGS@
+libccnet_la_CPPFLAGS = $(AM_CPPFLAGS) -DCCNET_LIB @PTHREAD_CFLAGS@ @SSL_CFLAGS@
 
 libccnet_la_SOURCES = ccnet-client.c packet-io.c libccnet_utils.c \
 	message.c proc-factory.c \
