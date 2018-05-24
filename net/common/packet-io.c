@@ -172,7 +172,7 @@ ccnet_packet_io_new_outgoing (CcnetSession *session,
     evutil_socket_t socket;
 
     if (sock_pton(addr_str, port, &addr) < 0) {
-        ccnet_warning ("wrong addresss format %s\n", addr_str);
+        ccnet_warning ("wrong address format %s\n", addr_str);
         return NULL;
     }
 
