@@ -26,6 +26,8 @@ AC_PROG_MAKE_SET
 # AC_PROG_RANLIB
 LT_INIT
 
+AM_PROG_VALAC([], [], [AC_MSG_ERROR([*** Unable to find Vala compiler])])
+
 # Checks for headers.
 AC_CHECK_HEADERS([sys/ioctl.h sys/time.h stdarg.h])
 
