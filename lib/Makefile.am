@@ -85,7 +85,7 @@ rpc_table.stamp: ${top_srcdir}/lib/rpc_table.py
 	@rm -f rpc_table.tmp
 	@touch rpc_table.tmp
 	@echo "[libsearpc]: generating rpc header files"
-	@PYTHON@ `which searpc-codegen.py` ${top_srcdir}/lib/rpc_table.py
+	@PYTHON@ @SEARPC_EXEC_PREFIX@/bin/searpc-codegen.py ${top_srcdir}/lib/rpc_table.py
 	@echo "[libsearpc]: done"
 	@mv -f rpc_table.tmp $@
 
