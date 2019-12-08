@@ -189,6 +189,13 @@ PKG_CHECK_MODULES(SEARPC, [libsearpc >= $SEARPC_REQUIRED])
 AC_SUBST(SEARPC_CFLAGS)
 AC_SUBST(SEARPC_LIBS)
 
+PKG_CHECK_VAR([SEARPC_EXEC_PREFIX], [libsearpc], [exec_prefix])
+AC_CHECK_PROG([SEARPC_CODEGEN], [searpc-codegen.py], [yes], [no],
+    [$SEARPC_EXEC_PREFIX/bin])
+if test "x${SEARPC_CODEGEN}" == "xno"; then
+    AC_MSG_ERROR([required program 'searpc-codegen.py' not found.])
+fi
+
 PKG_CHECK_MODULES(LIBEVENT, [libevent >= $LIBEVENT_REQUIRED])
 AC_SUBST(LIBEVENT_CFLAGS)
 AC_SUBST(LIBEVENT_LIBS)
